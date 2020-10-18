@@ -15,5 +15,9 @@
   },
   "peerDependencies": {
     "faunadb": "^3.0.1"
+  },
+  "dependencies": {
+    "faunadb": "^3.0.1",
+    "ts-jest": "^26.4.1"
   }
 }
