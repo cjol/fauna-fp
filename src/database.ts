@@ -9,6 +9,7 @@ import {
   Query,
   Cursor,
   Page,
+  Result,
 } from './types';
 
 export const ref: <T = unknown>(schema: Schema<T>, id: Arg<string>) => Ref<T> =
@@ -32,7 +33,7 @@ export const get: <T = unknown>(r: Arg<Ref<T>>) => Query<T> = (name) =>
 
 export const paginate = (
   opts: Arg<{ before?: Cursor; after?: Cursor; size?: number }> = {}
-) => <T = unknown>(results: Arg<Ref<T>>): Query<Page<T>> =>
+) => <T = unknown>(results: Arg<Ref<T>>): Query<Page<Result<T>>> =>
   q.Paginate(results, opts);
 
 /**
@@ -54,6 +55,6 @@ export const match: <T = unknown, O extends Arg[] = []>(
 ) => (terms: O) => Ref<T> = (i) => (t) => q.Match(i, ...t);
 // FIXME: should return setRef? Does it matter
 
-export const query = (client: Client) => <T>(x: Arg<T>) => {
-  return client.query<T>(x);
+export const doQuery = (client: Client) => <T>(x: Arg<T>) => {
+  return client.query<Result<T>>(x);
 };
