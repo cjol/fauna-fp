@@ -1,5 +1,7 @@
-import { pipe } from 'fp-ts/lib/function';
-import { Query, Arg, Page, q, Result, Callback } from './types';
+import { flow, pipe } from 'fp-ts/lib/function';
+import { index, matchTerms, paginate, get, match } from './database';
+import { select } from './object';
+import { Query, Arg, Page, q, Result, Callback, Ref } from './types';
 
 // TODO: Prettier formatting doesn't look great here
 // TODO: accept both pages and arrays for some of these methods
@@ -47,6 +49,13 @@ export const isEmpty = <T>(sources: Arg<T[]>) =>
 
 export const isNonEmpty = <T>(sources: Arg<T[]>) =>
   q.IsNonEmpty(sources) as Query<boolean>;
+
+type Collection<T> = Array<T> | Page<T>;
+type MappedCollection<C extends Collection<any>, O> = C extends Array<any>
+  ? Array<O>
+  : C extends Page<any>
+  ? Page<O>
+  : never;
 
 // TODO: do better to combine map and mapPage
 export const map = <I, O>(f: Callback<[I], O>) => (items: Arg<Array<I>>) =>

@@ -18,7 +18,7 @@ export type Cursor = { __TYPE__: 'FAUNA_CURSOR' };
 export type Ref<T = unknown> = { __TYPE__: 'FAUNA_REF'; type: T };
 
 export interface Query<T = unknown> {
-  __TYPE__: 'FAUNA';
+  __TYPE__: 'FAUNA_QUERY';
   type: T;
 }
 

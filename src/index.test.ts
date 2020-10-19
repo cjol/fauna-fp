@@ -1,12 +1,14 @@
 import { query as q } from 'faunadb';
-import { map, mean, reduce } from './array';
+import { map, mapPage, mean, reduce } from './array';
 import { length } from './string';
 import { expectTypeOf } from 'expect-type';
-import { Query } from './types';
-import { pipe } from 'fp-ts/function';
+import { Page, Query, Ref } from './types';
+import { flow, pipe } from 'fp-ts/function';
 import { equals, iff } from './control-flow';
 import { select } from './object';
 import { gte } from './number';
+import { get, index, match, paginate } from '.';
+import { doQuery } from './database';
 
 describe('misc', () => {
   const strArr = ['hello', 'world'];
@@ -58,6 +60,72 @@ describe('misc', () => {
         ),
         boolArr,
         numArr
+      )
+    );
+  });
+
+  test('user comments', () => {
+    interface User {
+      ref: Ref<User>;
+      data: {
+        name: string;
+        email: string;
+      };
+    }
+    interface Comment {
+      data: {
+        body: string;
+        author: Ref<User>;
+        replies: Array<Ref<Comment>>;
+      };
+    }
+    const usersByEmail = index<User, [string]>('users_by_name');
+    const commentsByUser = index<Comment, [Ref<User>]>('comments_by_user');
+    const getUserComments = flow(
+      match(usersByEmail),
+      get,
+      select('ref'),
+      match(commentsByUser),
+      paginate({ size: 10 }),
+      mapPage((comment) => ({
+        comment: select('data', 'body')(comment),
+        replies: pipe(
+          comment,
+          select('data', 'replies'),
+          map(flow(get, select('data', 'body')))
+        ),
+      }))
+    );
+
+    const comments = getUserComments('christopher@littlehq.uk');
+    expectTypeOf(comments).toEqualTypeOf<
+      Query<
+        Page<{
+          comment: string;
+          replies: string[];
+        }>
+      >
+    >();
+    expect(comments).toEqual(
+      q.Map(
+        q.Paginate(
+          q.Match(
+            q.Index('comments_by_user'),
+            q.Select(
+              ['ref'],
+              q.Get(
+                q.Match(q.Index('users_by_name'), 'christopher@littlehq.uk')
+              )
+            )
+          ),
+          { size: 10 }
+        ),
+        (item) => ({
+          comment: q.Select(['data', 'body'], item),
+          replies: q.Map(q.Select(['data', 'replies'], item), (item) =>
+            q.Select(['data', 'body'], q.Get(item))
+          ),
+        })
       )
     );
   });

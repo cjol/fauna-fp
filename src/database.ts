@@ -50,9 +50,12 @@ export const paginate = (
  * If `Match` only returns a single document, or only the first document is
  * needed, `Get` may be used to retrieve the document.
  */
-export const match: <T = unknown, O extends Arg[] = []>(
+export const matchTerms: <T = unknown, O extends Arg[] = []>(
   index: Index<T, O>
 ) => (terms: O) => Ref<T> = (i) => (t) => q.Match(i, ...t);
+export const match = <T, O>(index: Index<T, [O]>) => (term: Arg<O>) =>
+  q.Match(index, term) as Query<Ref<Result<T>>>;
+// TODO: should combine the above
 // FIXME: should return setRef? Does it matter
 
 export const doQuery = (client: Client) => <T>(x: Arg<T>) => {
