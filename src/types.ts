@@ -41,3 +41,7 @@ export type Result<T> = T extends Query<infer U>
   : T extends object
   ? never
   : T;
+
+export type Callback<T extends any[], R> = (
+  ...x: { [K in keyof T]: Arg<T[K]> }
+) => Arg<R>;
