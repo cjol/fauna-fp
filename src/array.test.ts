@@ -1,9 +1,34 @@
 import { query as q } from 'faunadb';
-import { all, any, append, map } from './array';
+import {
+  all,
+  any,
+  append,
+  count,
+  difference,
+  distinct,
+  drop,
+  filter,
+  foreach,
+  intersection,
+  isEmpty,
+  isNonEmpty,
+  map,
+  max,
+  min,
+  prepend,
+  reduce,
+  reverse,
+  sum,
+  take,
+  toObject,
+  union,
+} from './array';
 import { length } from './string';
 import { expectTypeOf } from 'expect-type';
 import { Query } from './types';
 import { pipe } from 'fp-ts/function';
+import { equals } from './control-flow';
+import { add } from './number';
 
 describe('array', () => {
   const strArr = ['hello', 'world'];
@@ -36,10 +61,137 @@ describe('array', () => {
     pipe(4, append(12));
   });
 
+  test('count', () => {
+    const result = count(strArr);
+    expectTypeOf(result).toEqualTypeOf<Query<number>>();
+    expect(result).toEqual(q.Count(strArr));
+    // @ts-expect-error
+    pipe('hello', count);
+  });
+
+  test('difference', () => {
+    const result = pipe(numArr, difference([1, 2, 3], [4, 5, 6]));
+    expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
+    expect(result).toEqual(q.Difference(numArr, [1, 2, 3], [4, 5, 6]));
+  });
+
+  test('distinct', () => {
+    const result = distinct(strArr);
+    expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
+    expect(result).toEqual(q.Distinct(strArr));
+  });
+
+  test('drop', () => {
+    const result = pipe(strArr, drop(5));
+    expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
+    expect(result).toEqual(q.Drop(5, strArr));
+  });
+
+  test('take', () => {
+    const result = pipe(strArr, take(5));
+    expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
+    expect(result).toEqual(q.Take(5, strArr));
+  });
+
+  test('toObject', () => {
+    const data: [string, string][] = [
+      ['foo', 'bar'],
+      ['fop', 'bap'],
+    ];
+    const result = toObject(data);
+    expectTypeOf(result).toEqualTypeOf<Query<Record<string, string>>>();
+    expect(result).toEqual(q.ToObject(data));
+  });
+
+  test('filter', () => {
+    const data = strArr;
+    const result = pipe(data, filter(equals('hello')));
+    expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
+    expect(result).toEqual(q.Filter(data, (b) => q.Equals('hello', b)));
+  });
+
+  test('foreach', () => {
+    const doForeach = foreach(length);
+    const result = doForeach(strArr);
+    expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
+    expect(result).toEqual(q.Foreach(strArr, (item) => q.Length(item)));
+  });
+
+  test('intersection', () => {
+    const result = pipe(numArr, intersection([1, 2, 3], [4, 5, 6]));
+    expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
+    expect(result).toEqual(q.Intersection([1, 2, 3], [4, 5, 6], numArr));
+  });
+
+  test('union', () => {
+    const result = pipe(numArr, union([1, 2, 3], [4, 5, 6]));
+    expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
+    expect(result).toEqual(q.Union([1, 2, 3], [4, 5, 6], numArr));
+  });
+
+  test('isEmpty', () => {
+    const result = isEmpty(boolArr);
+    expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
+    expect(result).toEqual(q.IsEmpty(boolArr));
+  });
+
+  test('isNonEmpty', () => {
+    const result = isNonEmpty(boolArr);
+    expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
+    expect(result).toEqual(q.IsNonEmpty(boolArr));
+  });
+
   test('map', () => {
     const data = strArr;
     const result = pipe(data, map(length));
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Map(data, (item) => q.Length(item)));
+  });
+
+  test('mapPage', () => {});
+
+  test('max', () => {
+    const result = max(numArr);
+    expectTypeOf(result).toEqualTypeOf<Query<number>>();
+    expect(result).toEqual(q.Max(numArr));
+    // @ts-expect-error
+    max(strArr);
+  });
+
+  test('min', () => {
+    const result = min(numArr);
+    expectTypeOf(result).toEqualTypeOf<Query<number>>();
+    expect(result).toEqual(q.Min(numArr));
+    // @ts-expect-error
+    min(strArr);
+  });
+
+  test('sum', () => {
+    const result = sum(numArr);
+    expectTypeOf(result).toEqualTypeOf<Query<number>>();
+    expect(result).toEqual(q.Sum(numArr));
+    // @ts-expect-error
+    sum(strArr);
+  });
+
+  test('prepend', () => {
+    const result = pipe(numArr, prepend([1, 2, 3]));
+    expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
+    expect(result).toEqual(q.Prepend([1, 2, 3], numArr));
+  });
+
+  test('reduce', () => {
+    const doReduction = reduce(add(), 0);
+    const result = doReduction(numArr);
+    expectTypeOf(result).toEqualTypeOf<Query<number>>();
+    expect(result).toEqual(
+      q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr)
+    );
+  });
+
+  test('reverse', () => {
+    const result = reverse(strArr);
+    expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
+    expect(result).toEqual(q.Reverse(strArr));
   });
 });

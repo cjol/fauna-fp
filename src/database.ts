@@ -12,8 +12,8 @@ import {
   Result,
 } from './types';
 
-export const ref: <T = unknown>(schema: Schema<T>, id: Arg<string>) => Ref<T> =
-  q.Ref;
+export const ref = <T = unknown>(schema: Schema<T>) => (id: Arg<string>) =>
+  q.Ref(schema, id) as Ref<T>;
 /**
  * The `Index` function returns a valid `Reference` for the specified index name in
  * the specified child database. If a child database is not specified, the
@@ -50,12 +50,9 @@ export const paginate = (
  * If `Match` only returns a single document, or only the first document is
  * needed, `Get` may be used to retrieve the document.
  */
-export const matchTerms: <T = unknown, O extends Arg[] = []>(
-  index: Index<T, O>
-) => (terms: O) => Ref<T> = (i) => (t) => q.Match(i, ...t);
 export const match = <T, O>(index: Index<T, [O]>) => (term: Arg<O>) =>
   q.Match(index, term) as Query<Ref<Result<T>>>;
-// TODO: should combine the above
+// TODO: Add matching on multiple terms
 // FIXME: should return setRef? Does it matter
 
 export const doQuery = (client: Client) => <T>(x: Arg<T>) => {

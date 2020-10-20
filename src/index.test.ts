@@ -8,7 +8,7 @@ import { equals, iff } from './control-flow';
 import { select } from './object';
 import { gte } from './number';
 import { get, index, match, paginate } from '.';
-import { doQuery } from './database';
+import { collection, doQuery, ref } from './database';
 
 describe('misc', () => {
   const strArr = ['hello', 'world'];
@@ -79,10 +79,12 @@ describe('misc', () => {
         replies: Array<Ref<Comment>>;
       };
     }
-    const usersByEmail = index<User, [string]>('users_by_name');
+
+    const usersCollection = collection<User>('users');
     const commentsByUser = index<Comment, [Ref<User>]>('comments_by_user');
+
     const getUserComments = flow(
-      match(usersByEmail),
+      ref(usersCollection),
       get,
       select('ref'),
       match(commentsByUser),
@@ -97,7 +99,7 @@ describe('misc', () => {
       }))
     );
 
-    const comments = getUserComments('christopher@littlehq.uk');
+    const comments = getUserComments('123456789');
     expectTypeOf(comments).toEqualTypeOf<
       Query<
         Page<{
@@ -106,17 +108,13 @@ describe('misc', () => {
         }>
       >
     >();
+
     expect(comments).toEqual(
       q.Map(
         q.Paginate(
           q.Match(
             q.Index('comments_by_user'),
-            q.Select(
-              ['ref'],
-              q.Get(
-                q.Match(q.Index('users_by_name'), 'christopher@littlehq.uk')
-              )
-            )
+            q.Select(['ref'], q.Get(q.Ref(q.Collection('users'), '123456789')))
           ),
           { size: 10 }
         ),
