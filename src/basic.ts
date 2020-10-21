@@ -48,6 +48,3 @@ export const abort: (x: Arg<string>) => Query<never> = (x) => q.Abort(x);
 export const iff = <T, F>(ifTrue: Arg<T>, ifFalse: Arg<F>) => (
   x: Arg<boolean>
 ) => q.If(x, ifTrue, ifFalse) as Query<Result<T | F>>;
-
-export const equals = <O>(a: Arg<O>) => (b: Arg<O>) =>
-  q.Equals(a, b) as Query<boolean>;

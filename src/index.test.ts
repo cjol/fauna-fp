@@ -3,11 +3,11 @@ import { map, mapPage, mean, reduce } from './array';
 import { length } from './string';
 import { expectTypeOf } from 'expect-type';
 import { Page, Query, Ref } from './types';
-import { toTuple } from './tuple';
+import { toTuple, tuple } from './tuple';
 import { flow, pipe } from 'fp-ts/function';
-import { equals, iff } from './basic';
+import { iff } from './basic';
 import { select } from './object';
-import { gte } from './number';
+import { gte, equals } from './logic';
 import { get, index, match, paginate } from '.';
 import { collection, ref } from './database';
 
@@ -28,7 +28,8 @@ describe('misc', () => {
         arr: x,
       })),
       reduce(
-        (curr, next) => pipe(gte(getLen(curr), getLen(next)), iff(curr, next)),
+        (curr, next) =>
+          pipe(tuple(curr, next).map(getLen), gte(), iff(curr, next)),
         { len: 0, arr: [] as string[] }
       ),
       select('arr', 0),
