@@ -27,7 +27,7 @@ import { length } from './string';
 import { expectTypeOf } from 'expect-type';
 import { Query } from './types';
 import { pipe } from 'fp-ts/function';
-import { equals } from './control-flow';
+import { equals } from './basic';
 import { add } from './number';
 
 describe('array', () => {

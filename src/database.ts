@@ -1,6 +1,8 @@
 import { Client } from 'faunadb';
+import { I } from 'ts-toolbelt';
 import {
   Schema,
+  Database,
   Arg,
   Ref,
   q,
@@ -10,16 +12,18 @@ import {
   Cursor,
   Page,
   Result,
+  ArgTuple,
+  FaunaFunction,
 } from './types';
 
 export const ref = <T = unknown>(schema: Schema<T>) => (id: Arg<string>) =>
   q.Ref(schema, id) as Ref<T>;
+
 /**
  * The `Index` function returns a valid `Reference` for the specified index name in
  * the specified child database. If a child database is not specified, the
  * returned index reference belongs to the current database.
  */
-
 export const index: <T = unknown, O extends Arg[] = []>(
   name: string
 ) => Index<T, O> = (name) => q.Index(name);
@@ -50,10 +54,13 @@ export const paginate = (
  * If `Match` only returns a single document, or only the first document is
  * needed, `Get` may be used to retrieve the document.
  */
-export const match = <T, O>(index: Index<T, [O]>) => (term: Arg<O>) =>
-  q.Match(index, term) as Query<Ref<Result<T>>>;
-// TODO: Add matching on multiple terms
+export const match = <T, I extends any[]>(index: Index<T, I>) => (
+  terms: ArgTuple<I>
+) => q.Match(index, ...terms) as Query<Ref<Result<T>>>;
 // FIXME: should return setRef? Does it matter
+
+export const fun = <I extends any[], O>(name: Arg<string>) =>
+  q.Function(name) as FaunaFunction<I, O>;
 
 export const doQuery = (client: Client) => <T>(x: Arg<T>) => {
   return client.query<Result<T>>(x);

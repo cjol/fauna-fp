@@ -3,12 +3,13 @@ import { map, mapPage, mean, reduce } from './array';
 import { length } from './string';
 import { expectTypeOf } from 'expect-type';
 import { Page, Query, Ref } from './types';
+import { toTuple } from './tuple';
 import { flow, pipe } from 'fp-ts/function';
-import { equals, iff } from './control-flow';
+import { equals, iff } from './basic';
 import { select } from './object';
 import { gte } from './number';
 import { get, index, match, paginate } from '.';
-import { collection, doQuery, ref } from './database';
+import { collection, ref } from './database';
 
 describe('misc', () => {
   const strArr = ['hello', 'world'];
@@ -32,10 +33,10 @@ describe('misc', () => {
       ),
       select('arr', 0),
       equals('HELLO'),
-      iff<Array<number | boolean>>(boolArr, numArr)
+      iff(boolArr, numArr)
     );
 
-    expectTypeOf(result).toEqualTypeOf<Query<Array<number | boolean>>>();
+    expectTypeOf(result).toEqualTypeOf<Query<Array<number> | Array<boolean>>>();
 
     expect(result).toEqual(
       q.If(
@@ -81,25 +82,30 @@ describe('misc', () => {
     }
 
     const usersCollection = collection<User>('users');
-    const commentsByUser = index<Comment, [Ref<User>]>('comments_by_user');
-
-    const getUserComments = flow(
-      ref(usersCollection),
-      get,
-      select('ref'),
-      match(commentsByUser),
-      paginate({ size: 10 }),
-      mapPage((comment) => ({
-        comment: select('data', 'body')(comment),
-        replies: pipe(
-          comment,
-          select('data', 'replies'),
-          map(flow(get, select('data', 'body')))
-        ),
-      }))
+    const commentsByUser = index<Comment, [Ref<User>, string]>(
+      'tagged_comments_by_user'
     );
 
-    const comments = getUserComments('123456789');
+    const getUserComments = (id: string, tag: string) =>
+      pipe(
+        id,
+        ref(usersCollection),
+        get,
+        select('ref'),
+        toTuple(tag),
+        match(commentsByUser),
+        paginate({ size: 10 }),
+        mapPage((comment) => ({
+          comment: select('data', 'body')(comment),
+          replies: pipe(
+            comment,
+            select('data', 'replies'),
+            map(flow(get, select('data', 'body')))
+          ),
+        }))
+      );
+
+    const comments = getUserComments('123456789', 'untagged');
     expectTypeOf(comments).toEqualTypeOf<
       Query<
         Page<{
@@ -113,8 +119,9 @@ describe('misc', () => {
       q.Map(
         q.Paginate(
           q.Match(
-            q.Index('comments_by_user'),
-            q.Select(['ref'], q.Get(q.Ref(q.Collection('users'), '123456789')))
+            q.Index('tagged_comments_by_user'),
+            q.Select(['ref'], q.Get(q.Ref(q.Collection('users'), '123456789'))),
+            'untagged'
           ),
           { size: 10 }
         ),
