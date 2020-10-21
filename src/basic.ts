@@ -31,13 +31,6 @@ export const doMany = <I extends any[]>(...entries: ArgTuple<I>) =>
   q.Do(...entries) as Query<Result<Tuple.Last<I>>>;
 
 /**
- * Executes an anonymous function.
- */
-// TODO: consider whether we should deliberately drop this
-export const lambda = <I extends any[], O>(f: Callback<I, O>) =>
-  q.Lambda(f) as Query<Callback<I, O>>;
-
-/**
  * Defines a variable’s value.
  */
 export const letVar = <I, T extends Record<string, Arg<any>>>(expr: I) => (
