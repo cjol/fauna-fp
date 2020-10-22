@@ -3,8 +3,8 @@ import { Arg, q, Query, Ref } from './types';
 /**
  * Returns true if all values are true.
  */
-export const all = (...a: Arg<boolean>[]) => (...b: Arg<boolean>[]) =>
-  q.All(...a, ...b) as Query<boolean>;
+export const all = (...a: Arg<boolean>[]) => (b: Arg<boolean>[]) =>
+  q.All([...a, ...b]) as Query<boolean>;
 
 /**
  * Returns true when a specific field is found in a document.
@@ -15,7 +15,7 @@ export const containsField = (field: Arg<string>) => (obj: Arg) =>
 /**
  * Returns true when a document contains a value at the specified path.
  */
-export const containsPath = (path: Arg<string>[]) => (obj: Arg) =>
+export const containsPath = (...path: Arg<string | number>[]) => (obj: Arg) =>
   q.ContainsPath(path, obj) as Query<boolean>;
 
 /**
@@ -67,5 +67,5 @@ export const not = (b: Arg<boolean>) => q.Not(b) as Query<boolean>;
 /**
  * Returns true if any value is true.
  */
-export const or = (...a: Arg<boolean>[]) => (...b: Arg<boolean>[]) =>
+export const or = (...a: Arg<boolean>[]) => (b: Arg<boolean>[]) =>
   q.Or(...a, ...b) as Query<boolean>;

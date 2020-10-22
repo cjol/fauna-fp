@@ -16,6 +16,7 @@ import {
   FaunaFunction,
 } from './types';
 
+// TODO: curry better so you don't have to call two functions
 export const ref = <T = unknown>(schema: Schema<T>) => (id: Arg<string>) =>
   q.Ref(schema, id) as Ref<T>;
 

@@ -1,6 +1,7 @@
 import { O } from 'ts-toolbelt';
 import { Arg, Query, q } from './types';
 
+// TODO: curry better so we don't have to call two functions
 export const select = <P extends (string | number)[]>(...path: P) => <
   T extends object
 >(
