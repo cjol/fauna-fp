@@ -1,6 +1,5 @@
 import { query as q } from 'faunadb';
 import {
-  all,
   any,
   append,
   count,
@@ -22,6 +21,7 @@ import {
   take,
   toObject,
   union,
+  all,
 } from './array';
 import { length } from './string';
 import { expectTypeOf } from 'expect-type';

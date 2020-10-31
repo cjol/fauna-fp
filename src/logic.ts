@@ -1,10 +1,10 @@
 import { Arg, q, Query, Ref } from './types';
 
 /**
- * Returns true if all values are true.
+ * Returns true if all values are true. Does not handle collections, and short-circuits on false values. Also see `all`.
  */
-export const all = (...a: Arg<boolean>[]) => (b: Arg<boolean>[]) =>
-  q.All([...a, ...b]) as Query<boolean>;
+export const and = (...a: Arg<boolean>[]) => (b: Arg<boolean>[]) =>
+  q.And(...a, ...b) as Query<boolean>;
 
 /**
  * Returns true when a specific field is found in a document.

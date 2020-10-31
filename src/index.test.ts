@@ -8,8 +8,9 @@ import { flow, pipe, tuple } from 'fp-ts/function';
 import { iff } from './basic';
 import { select } from './object';
 import { gte, equals } from './logic';
-import { get, index, match, paginate } from '.';
+import { get, index, paginate } from '.';
 import { collection, ref } from './database';
+import { match } from './set';
 
 describe('misc', () => {
   const strArr = ['hello', 'world'];

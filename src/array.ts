@@ -1,8 +1,10 @@
 import { Query, Arg, Page, q, Result, Callback, Ref } from './types';
 
 // TODO: accept both pages and arrays for some of these methods
-
-export const all = (x: Arg<boolean[]>) => q.All(x) as Query<boolean>;
+/**
+ * Returns true if all values are true. Also see `and` for short-circuit evaluation
+ */
+export const all = (b: Arg<boolean[]>) => q.All(b) as Query<boolean>;
 
 export const any = (x: Arg<boolean[]>) => q.Any(x) as Query<boolean>;
 

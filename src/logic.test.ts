@@ -2,7 +2,7 @@ import { query as q } from 'faunadb';
 import { expectTypeOf } from 'expect-type';
 import { Query, time } from './types';
 import {
-  all,
+  and,
   containsField,
   containsPath,
   containsValue,
@@ -20,11 +20,11 @@ import { add } from './number';
 import { spread } from './tuple';
 import { collection, ref } from './database';
 describe('control flow', () => {
-  test('all', () => {
+  test('and', () => {
     const input = [true, true, false];
-    const result = pipe(input, all(false), tuple, all());
+    const result = pipe(input, and(false), tuple, and());
     expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
-    expect(result).toEqual(q.All([q.All([false, true, true, false])]));
+    expect(result).toEqual(q.And(q.And(false, true, true, false)));
   });
 
   test('containsField', () => {
