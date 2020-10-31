@@ -8,6 +8,9 @@ export const paginate = (
 ) => <T = unknown>(results: Arg<Ref<T>>): Query<Page<Result<T>>> =>
   q.Paginate(results, opts);
 
+/**
+ * Retrieves a key based on its secret.
+ */
 export const keyFromSecret = <T = unknown>(secret: Arg<string>) =>
   q.KeyFromSecret(secret) as Query<T>;
 

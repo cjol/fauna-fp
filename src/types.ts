@@ -12,7 +12,21 @@ export type Index<T = unknown, O extends Arg[] = []> = {
   params: O;
 };
 
+export type Role = { __TYPE__: 'FAUNA_ROLE' };
+
+export type Key<D = unknown> = {
+  __TYPE__: 'FAUNA_KEY';
+  data: D;
+};
 export type Schema<T = unknown> = Collection<T> | Index<T>;
+export type Credentials<I = unknown, D = unknown> = {
+  ref: Ref<Credentials>;
+  ts: number;
+  hashed_password: string;
+  instance: Ref<I>;
+  data: D;
+};
+export type Token<D = unknown> = { __TYPE__: 'FAUNA_TOKEN'; data: D };
 
 export type Cursor = { __TYPE__: 'FAUNA_CURSOR' };
 export type Timestamp = { __TYPE__: 'FAUNA_TIMESTAMP' };
