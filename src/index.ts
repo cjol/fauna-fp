@@ -7,5 +7,13 @@ export * from './number';
 export * from './string';
 export * from './read';
 export * from './set';
+export * from './conversion';
+export * from './authentication';
+export * from './temporality';
+export * from './date';
+export * from './maths';
+export * from './typeChecks';
+export * from './write';
+export * from './misc';
 
 export * from './tuple';

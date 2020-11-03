@@ -20,5 +20,9 @@
   "dependencies": {
     "faunadb": "^3.0.1",
     "ts-jest": "^26.4.1"
+  },
+  "scripts": {
+    "test": "jest --coverage",
+    "build": "tsc"
   }
 }
