@@ -1,6 +1,6 @@
 {
   "name": "fauna-fp",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Functional query builder for fauna db",
   "main": "dist/index.js",
   "repository": "git@github.com:cjol/fauna-fp",
