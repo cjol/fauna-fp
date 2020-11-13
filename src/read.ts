@@ -1,7 +1,8 @@
 import { Arg, Cursor, Page, q, Query, Ref, Result } from './types';
 
-export const get: <T = unknown>(r: Arg<Ref<T>>) => Query<T> = (name) =>
-  q.Get(name);
+export const get: <T = unknown>(
+  r: Arg<Ref<T>>
+) => Query<{ ref: Ref<T>; data: T; ts: number }> = (name) => q.Get(name);
 
 export const paginate = (
   opts: Arg<{ before?: Cursor; after?: Cursor; size?: number }> = {}

@@ -3,8 +3,12 @@ import { query } from 'faunadb';
 // treat q as untyped because the builtin types aren't very helpful
 export const q = query as Record<keyof typeof query, any>;
 
-export type Collection<T = unknown> = { __TYPE__: 'FAUNA_COLLECTION'; type: T };
-export type Database = { __TYPE__: 'FAUNA_DATABASE' };
+export type Collection<T = unknown, D = unknown> = {
+  __TYPE__: 'FAUNA_COLLECTION';
+  type: T;
+  data: D;
+};
+export type Database<T = unknown> = { __TYPE__: 'FAUNA_DATABASE'; data: T };
 
 export type Index<T = unknown, O extends Arg[] = []> = {
   __TYPE__: 'FAUNA_INDEX';
@@ -34,8 +38,9 @@ export const time = (x: Arg<string>) => q.Time(x) as Query<Timestamp>;
 export type Date = { __TYPE__: 'FAUNA_DATE' };
 
 export type Ref<T = unknown> = { __TYPE__: 'FAUNA_REF'; type: T };
-export type FaunaFunction<I extends Arg[], O> = {
+export type FaunaFunction<I extends Arg[], O, D = unknown> = {
   __TYPE__: 'FAUNA_FUNCTION';
+  data: D;
   terms: I;
   result: O;
 };
