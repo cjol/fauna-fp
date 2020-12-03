@@ -1,4 +1,4 @@
-import { Query, q, Arg } from './types';
+import { Query, q, Arg } from "./types";
 
 export const add = (as: Arg<number>[]) => q.Add(as) as Query<number>;
 export const subtract = (as: Arg<number>[]) => q.Subtract(as) as Query<number>;

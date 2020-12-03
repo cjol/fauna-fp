@@ -10,7 +10,7 @@ import {
   Role,
   FaunaFunction,
   Key,
-} from './types';
+} from "./types";
 
 /**  Create a document in a collection. */
 export const create = <T = unknown>(
@@ -81,7 +81,7 @@ export const createFunction = <
   }>;
 
 interface SourceObject<O> {
-  collection: Ref<Collection<O>> | '_';
+  collection: Ref<Collection<O>> | "_";
   fields: Record<string, (document: Document<O>) => Query<unknown>>;
 }
 
@@ -158,7 +158,7 @@ export const deleted = <T>(ref: Arg<Ref<T>>) =>
     data: T;
   }>;
 
-type Action = 'create' | 'delete' | 'update';
+type Action = "create" | "delete" | "update";
 /** Add an event to a document’s history. */
 export const insert = <T>(
   ref: Arg<Ref<T>>,

@@ -1,4 +1,4 @@
-import { Arg, q, Query, Ref } from './types';
+import { Arg, q, Query, Ref } from "./types";
 
 /**
  * Returns true if all values are true. Does not handle collections, and short-circuits on false values. Also see `all`.

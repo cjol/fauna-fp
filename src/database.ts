@@ -1,4 +1,4 @@
-import { Arg, Ref, q, Index, Collection, Query, FaunaFunction } from './types';
+import { Arg, Ref, q, Index, Collection, Query, FaunaFunction } from "./types";
 
 export const ref = <T>(schema: Arg<Ref<Collection<T>>>, id: Arg<string>) =>
   q.Ref(schema, id) as Query<Ref<T>>;

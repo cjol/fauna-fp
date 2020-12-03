@@ -1,4 +1,4 @@
-import { Arg, Query, q } from './types';
+import { Arg, Query, q } from "./types";
 
 export const isNull = (arg: Arg<unknown>) => q.IsNull(arg) as Query<boolean>;
 

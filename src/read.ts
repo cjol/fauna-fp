@@ -1,4 +1,4 @@
-import { Arg, Cursor, Page, q, Query, Ref } from './types';
+import { Arg, Cursor, Page, q, Query, Ref } from "./types";
 
 export const get = <T = unknown>(ref: Arg<Ref<T>>) =>
   q.Get(ref) as Query<{ ref: Ref<T>; data: T; ts: number }>;

@@ -1,5 +1,5 @@
-import { O, U, A, L } from 'ts-toolbelt';
-import { Arg, Query, q, Callback } from './types';
+import { O, U, A, L } from "ts-toolbelt";
+import { Arg, Query, q, Callback } from "./types";
 
 export const select = <T extends object, P extends Array<A.Key>>(
   item: Arg<T>,

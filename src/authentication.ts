@@ -12,7 +12,7 @@ import {
   Role,
   Timestamp,
   Token,
-} from './types';
+} from "./types";
 
 /**
  * Create a key.

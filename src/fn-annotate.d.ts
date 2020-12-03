@@ -1,3 +1,3 @@
-declare module 'fn-annotate' {
+declare module "fn-annotate" {
   export default function (f: Function): string[];
 }

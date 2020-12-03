@@ -1,4 +1,4 @@
-import { Arg, ArgTuple, Callback, Index, q, Query, Ref } from './types';
+import { Arg, ArgTuple, Callback, Index, q, Query, Ref } from "./types";
 
 // TODO: be more precise about the difference between a Set and an Array
 

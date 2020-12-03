@@ -1,4 +1,4 @@
-import { Arg, Query, q } from './types';
+import { Arg, Query, q } from "./types";
 
 /**
  * Converts a string into a case-normalized string.

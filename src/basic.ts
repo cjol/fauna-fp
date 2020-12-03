@@ -1,5 +1,5 @@
-import { I, Tuple } from 'ts-toolbelt';
-import annotate from 'fn-annotate';
+import { I, Tuple } from "ts-toolbelt";
+import annotate from "fn-annotate";
 import {
   Arg,
   ArgTuple,
@@ -9,9 +9,9 @@ import {
   Query,
   Ref,
   Timestamp,
-} from './types';
-import { pipe, tuple } from 'fp-ts/lib/function';
-import { concat, repeat } from './string';
+} from "./types";
+import { pipe, tuple } from "fp-ts/lib/function";
+import { concat, repeat } from "./string";
 
 /**
  * Retrieves documents at or before a timestamp.
@@ -43,7 +43,7 @@ export const letVar = <I, O>(
 ) => {
   const params = annotate(f);
   if (params.length !== 1)
-    throw new Error('Only one var can currently be set in letVar');
+    throw new Error("Only one var can currently be set in letVar");
   const getVar = q.Var(params[0]) as Query<I>;
   return q.Let({ [params[0]]: val }, f(getVar)) as Query<O>;
 };

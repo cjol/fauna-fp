@@ -1,21 +1,21 @@
-import { query } from 'faunadb';
+import { query } from "faunadb";
 
 // treat q as untyped because the builtin types aren't very helpful
 export const q = query as Record<keyof typeof query, any>;
 
 export type Collection<T = unknown, D = unknown> = {
-  __TYPE__: { name: 'FAUNA_COLLECTION'; type: T; data: D };
+  __TYPE__: { name: "FAUNA_COLLECTION"; type: T; data: D };
 };
-export type Database<T = unknown> = { __TYPE__: 'FAUNA_DATABASE'; data: T };
+export type Database<T = unknown> = { __TYPE__: "FAUNA_DATABASE"; data: T };
 
 export type Index<T = unknown, O extends Arg[] = []> = {
-  __TYPE__: { name: 'FAUNA_INDEX'; result: T; params: O };
+  __TYPE__: { name: "FAUNA_INDEX"; result: T; params: O };
 };
 
-export type Role = { __TYPE__: { name: 'FAUNA_ROLE' } };
+export type Role = { __TYPE__: { name: "FAUNA_ROLE" } };
 
 export type Key<D = unknown> = {
-  __TYPE__: { name: 'FAUNA_KEY'; data: D };
+  __TYPE__: { name: "FAUNA_KEY"; data: D };
 };
 export type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<T>>;
 export type Credentials<I = unknown, D = unknown> = {
@@ -25,23 +25,23 @@ export type Credentials<I = unknown, D = unknown> = {
   instance: Ref<I>;
   data: D;
 };
-export type Token<D = unknown> = { __TYPE__: { name: 'FAUNA_TOKEN'; data: D } };
+export type Token<D = unknown> = { __TYPE__: { name: "FAUNA_TOKEN"; data: D } };
 
-export type Cursor = { __TYPE__: { name: 'FAUNA_CURSOR' } };
-export type Timestamp = { __TYPE__: { name: 'FAUNA_TIMESTAMP' } };
+export type Cursor = { __TYPE__: { name: "FAUNA_CURSOR" } };
+export type Timestamp = { __TYPE__: { name: "FAUNA_TIMESTAMP" } };
 export const time = (x: Arg<string>) => q.Time(x) as Query<Timestamp>;
-export type Date = { __TYPE__: { name: 'FAUNA_DATE' } };
+export type Date = { __TYPE__: { name: "FAUNA_DATE" } };
 
 export type Ref<T = unknown> = {
   id: string;
-  __TYPE__: { name: 'FAUNA_REF'; type: T };
+  __TYPE__: { name: "FAUNA_REF"; type: T };
 };
 export type FaunaFunction<I extends Arg[], O, D = unknown> = {
-  __TYPE__: { name: 'FAUNA_FUNCTION'; data: D; terms: I; result: O };
+  __TYPE__: { name: "FAUNA_FUNCTION"; data: D; terms: I; result: O };
 };
 
 export interface Query<T = unknown> {
-  __TYPE__: { name: 'FAUNA_QUERY'; type: T };
+  __TYPE__: { name: "FAUNA_QUERY"; type: T };
 }
 
 type QueryOrLiteral<T> = T | Query<T>;

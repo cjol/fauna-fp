@@ -1,4 +1,4 @@
-import { Query, Arg, Page, q, Callback, Ref } from './types';
+import { Query, Arg, Page, q, Callback, Ref } from "./types";
 
 // TODO: accept both pages and arrays for some of these methods
 /**
