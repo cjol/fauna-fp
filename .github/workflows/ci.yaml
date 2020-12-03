@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
       - run: yarn
-      - run: yarn build --if-present
+      - run: yarn build
       - run: yarn test
         env:
           CI: true
