@@ -9,7 +9,6 @@ import {
   q,
   Query,
   Ref,
-  Result,
   Role,
   Timestamp,
   Token,
@@ -72,15 +71,15 @@ export const keys = <D = unknown>() => q.Keys() as Collection<Key<D>>;
 export const login = <D = unknown, T = unknown>(
   identity: Arg<Ref<T>>,
   params: Arg<{
-    data: D;
     password: string;
-    ttl: Timestamp;
+    data?: D;
+    ttl?: Timestamp;
   }>
 ) =>
   q.Login(identity, params) as Query<{
     ref: Ref<Token<D>>;
     ts: number;
-    document: Ref<T>;
+    instance: Ref<T>;
     secret: string;
   }>;
 

@@ -19,7 +19,8 @@
     "faunadb": "^3.0.1"
   },
   "dependencies": {
-    "faunadb": "^3.0.1"
+    "faunadb": "^3.0.1",
+    "fn-annotate": "^1.2.0"
   },
   "scripts": {
     "test": "jest --coverage",

@@ -1,16 +1,21 @@
 import { query as q } from 'faunadb';
 import { expectTypeOf } from 'expect-type';
-import { merge, select, toArray } from './object';
-import { Query } from './types';
-import { pipe } from 'fp-ts/lib/function';
+import { merge, select, selectDefault, toArray } from './object';
+import { Arg, Query } from './types';
 
 describe('object', () => {
   test('select', () => {
-    const data = { foo: { bar: true } };
-    const selectFooBar = select('foo', 'bar');
-    const result = selectFooBar(data);
-    expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
-    expect(result).toEqual(q.Select(['foo', 'bar'], data));
+    const data = { foo: { bar: { zim: true }, baz: null } };
+    const intermediate = select(data, 'foo', 'bar');
+    const result = selectDefault(intermediate, null, 'zim');
+
+    const input: Arg<{ name: string }> = { name: 'hello' };
+    const r = select(input, 'name');
+
+    expectTypeOf(result).toEqualTypeOf<Query<boolean | null>>();
+    expect(result).toEqual(
+      q.Select(['zim'], q.Select(['foo', 'bar'], data), null as any)
+    );
   });
 
   test('merge', () => {

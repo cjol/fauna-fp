@@ -1,4 +1,4 @@
-import { Arg, ArgTuple, Callback, Index, q, Query, Ref, Result } from './types';
+import { Arg, ArgTuple, Callback, Index, q, Query, Ref } from './types';
 
 // TODO: be more precise about the difference between a Set and an Array
 
@@ -19,8 +19,9 @@ import { Arg, ArgTuple, Callback, Index, q, Query, Ref, Result } from './types';
  * Combines the items in a set with set’s indexed values.
  */
 export const join = <O, T extends any[]>(
-  detail: Arg<Index<O, T> | Callback<T, O>>
-) => (source: Arg<T[]>) => q.Join(source, detail) as Query<Result<O>[]>;
+  detail: Arg<Index<O, T> | Callback<T, O>>,
+  source: Arg<T[]>
+) => q.Join(source, detail) as Query<O[]>;
 
 /**
  * The `Match` function finds the "search terms" provided to `Match` in the
@@ -36,9 +37,10 @@ export const join = <O, T extends any[]>(
  * If `Match` only returns a single document, or only the first document is
  * needed, `Get` may be used to retrieve the document.
  */
-export const match = <T, I extends any[]>(index: Index<T, I>) => (
+export const match = <T, I extends any[]>(
+  index: Arg<Ref<Index<T, I>>>,
   terms: ArgTuple<I>
-) => q.Match(index, ...terms) as Query<Ref<Result<T>>>;
+) => q.Match(index, ...terms) as Query<T>;
 
 // Max: defined in array
 // Mean: defined in array
@@ -47,15 +49,14 @@ export const match = <T, I extends any[]>(index: Index<T, I>) => (
 /**
  * Returns a subset of a set, in the specified range.
  */
-export const range = <T>(start: Arg<T>, end: Arg<T>) => (set: Arg<T[]>) =>
-  q.Range(set, start, end) as Query<Result<T>[]>;
+export const range = <T>(start: Arg<T>, end: Arg<T>, set: Arg<T[]>) =>
+  q.Range(set, start, end) as Query<T[]>;
 
 // Reduce: defined in array
 // Reverse: defined in array
 
 // Singleton: TODO
-export const singleton = <T>(item: Arg<T>) =>
-  q.Singleton(item) as Query<Result<T>[]>;
+export const singleton = <T>(item: Arg<T>) => q.Singleton(item) as Query<T[]>;
 
 // Sum: defined in array
 // Union: defined in array

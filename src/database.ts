@@ -1,40 +1,19 @@
-import { Client } from 'faunadb';
-import {
-  Schema,
-  Database,
-  Arg,
-  Ref,
-  q,
-  Index,
-  Collection,
-  Query,
-  Cursor,
-  Page,
-  Result,
-  ArgTuple,
-  FaunaFunction,
-} from './types';
+import { Arg, Ref, q, Index, Collection, Query, FaunaFunction } from './types';
 
-// TODO: curry better so you don't have to call two functions
-export const ref = <T = unknown>(schema: Schema<T>) => (id: Arg<string>) =>
-  q.Ref(schema, id) as Ref<T>;
+export const ref = <T>(schema: Arg<Ref<Collection<T>>>, id: Arg<string>) =>
+  q.Ref(schema, id) as Query<Ref<T>>;
 
 /**
  * The `Index` function returns a valid `Reference` for the specified index name in
  * the specified child database. If a child database is not specified, the
  * returned index reference belongs to the current database.
  */
-export const index: <T = unknown, O extends Arg[] = []>(
+export const index = <T = unknown, O extends Arg<unknown>[] = []>(
   name: string
-) => Index<T, O> = (name) => q.Index(name);
+) => q.Index(name) as Query<Ref<Index<T, O>>>;
 
-export const collection: <T = unknown>(name: string) => Collection<T> = (
-  name
-) => q.Collection(name);
+export const collection = <T = unknown>(name: string) =>
+  q.Collection(name) as Query<Ref<Collection<T>>>;
 
 export const fun = <I extends any[], O>(name: Arg<string>) =>
-  q.Function(name) as FaunaFunction<I, O>;
-
-export const doQuery = (client: Client) => <T>(x: Arg<T>) => {
-  return client.query<Result<T>>(x);
-};
+  q.Function(name) as Query<Ref<FaunaFunction<I, O>>>;

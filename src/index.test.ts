@@ -2,7 +2,7 @@ import { query as q } from 'faunadb';
 import { map, mapPage, mean, reduce } from './array';
 import { length } from './string';
 import { expectTypeOf } from 'expect-type';
-import { Page, Query, Ref } from './types';
+import { Page, qAll, Query, Ref } from './types';
 import { toTuple } from './tuple';
 import { flow, pipe, tuple } from 'fp-ts/function';
 import { iff } from './basic';
@@ -21,37 +21,39 @@ describe('misc', () => {
   // If it's 'HELLO' then return one thing, else return another (note different types are preserved)
   test('max avg string length', () => {
     const data = [strArr, strArr];
-    const getLen = select('len');
-    const result = pipe(
-      data,
-      map((x) => ({
-        len: pipe(x, map(length), mean),
-        arr: x,
-      })),
-      reduce(
-        (curr, next) =>
-          pipe(tuple(curr, next).map(getLen), gte(), iff(curr, next)),
-        { len: 0, arr: [] as string[] }
-      ),
-      select('arr', 0),
-      equals('HELLO'),
-      iff(boolArr, numArr)
+    const items = map(
+      (x) =>
+        qAll({
+          len: mean(map(length, x)),
+          arr: x,
+        }),
+      data
     );
+    const greatest = reduce(
+      (curr, next) => {
+        const currLen = select(curr, 'len');
+        const nextLen = select(next, 'len');
+        return iff(gte([currLen, nextLen]), next, curr);
+      },
+      { len: 0, arr: [] as string[] },
+      items
+    );
+    const first = select(greatest, 'arr', 0);
+    const result = iff(equals(first, 'HELLO'), boolArr, numArr);
 
     expectTypeOf(result).toEqualTypeOf<Query<Array<number> | Array<boolean>>>();
 
     expect(result).toEqual(
       q.If(
         q.Equals(
-          'HELLO',
           q.Select(
             ['arr', 0],
             q.Reduce(
               (curr: any, next: any) =>
                 q.If(
                   q.GTE(q.Select(['len'], curr), q.Select(['len'], next)),
-                  curr,
-                  next
+                  next,
+                  curr
                 ),
               { len: 0, arr: [] as string[] },
               q.Map(data, (item) => ({
@@ -59,7 +61,8 @@ describe('misc', () => {
                 len: q.Mean(q.Map(item, (item) => q.Length(item))),
               }))
             )
-          )
+          ),
+          'HELLO'
         ),
         boolArr,
         numArr
@@ -69,43 +72,38 @@ describe('misc', () => {
 
   test('user comments', () => {
     interface User {
-      ref: Ref<User>;
-      data: {
-        name: string;
-        email: string;
-      };
+      name: string;
+      email: string;
     }
     interface Comment {
-      data: {
-        body: string;
-        author: Ref<User>;
-        replies: Array<Ref<Comment>>;
-      };
+      body: string;
+      author: Ref<User>;
+      replies: Array<Ref<Comment>>;
     }
 
     const usersCollection = collection<User>('users');
-    const commentsByUser = index<Comment, [Ref<User>, string]>(
+    const commentsByUser = index<Ref<Comment>, [Ref<User>, string]>(
       'tagged_comments_by_user'
     );
-
-    const getUserComments = (id: string, tag: string) =>
-      pipe(
-        id,
-        ref(usersCollection),
-        get,
-        select('ref'),
-        toTuple(tag),
-        match(commentsByUser),
-        paginate({ size: 10 }),
-        mapPage((comment) => ({
-          comment: select('data', 'body')(comment),
-          replies: pipe(
-            comment,
-            select('data', 'replies'),
-            map(flow(get, select('data', 'body')))
-          ),
-        }))
+    const getUserComments = (id: string, tag: string) => {
+      const commentsPage = paginate(
+        match(commentsByUser, [ref(usersCollection, id), tag]),
+        { size: 10 }
       );
+
+      return mapPage((commentRef) => {
+        const commentDoc = get(commentRef);
+        const comment = select(commentDoc, 'data', 'body');
+        const replyRefs = select(commentDoc, 'data', 'replies');
+        return qAll({
+          comment,
+          replies: map(
+            (reply) => select(get(reply), 'data', 'body'),
+            replyRefs
+          ),
+        });
+      }, commentsPage);
+    };
 
     const comments = getUserComments('123456789', 'untagged');
     expectTypeOf(comments).toEqualTypeOf<
@@ -122,14 +120,14 @@ describe('misc', () => {
         q.Paginate(
           q.Match(
             q.Index('tagged_comments_by_user'),
-            q.Select(['ref'], q.Get(q.Ref(q.Collection('users'), '123456789'))),
+            q.Ref(q.Collection('users'), '123456789'),
             'untagged'
           ),
           { size: 10 }
         ),
         (item) => ({
-          comment: q.Select(['data', 'body'], item),
-          replies: q.Map(q.Select(['data', 'replies'], item), (item) =>
+          comment: q.Select(['data', 'body'], q.Get(item)),
+          replies: q.Map(q.Select(['data', 'replies'], q.Get(item)), (item) =>
             q.Select(['data', 'body'], q.Get(item))
           ),
         })

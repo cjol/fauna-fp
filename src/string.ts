@@ -8,33 +8,34 @@ export const casefold = (str: Arg<string>) => q.Casefold(str) as Query<string>;
 /**
  * Combines a list of strings into a single string.
  */
-export const concat = (sep?: Arg<string>) => (strs: Arg<string[]>) =>
+export const concat = (strs: Arg<string[]>, sep?: Arg<string>) =>
   q.Concat(strs, sep) as Query<string>;
 
 /**
  * Tests whether a string contains a specific string.
  */
-export const containsStr = (needle: Arg<string>) => (haystack: Arg<string>) =>
+export const containsStr = (needle: Arg<string>, haystack: Arg<string>) =>
   q.ContainsStr(haystack, needle) as Query<boolean>;
 
 /**
  * Tests whether a string contains a specific pattern.
  */
-export const containsStrRegex = (pattern: Arg<string>) => (
-  haystack: Arg<string>
-) => q.ContainsStrRegex(haystack, pattern) as Query<boolean>;
+export const containsStrRegex = (pattern: Arg<string>, haystack: Arg<string>) =>
+  q.ContainsStrRegex(haystack, pattern) as Query<boolean>;
 
 /**
  * Tests whether a string ends with a specific string.
  */
-export const endsWith = (needle: Arg<string>) => (haystack: Arg<string>) =>
+export const endsWith = (needle: Arg<string>, haystack: Arg<string>) =>
   q.EndsWith(haystack, needle) as Query<boolean>;
 
 /**
  * Searches for a string within a string.
  */
-export const findStr = (needle: Arg<string>, start?: Arg<number>) => (
-  haystack: Arg<string>
+export const findStr = (
+  needle: Arg<string>,
+  haystack: Arg<string>,
+  start?: Arg<number>
 ) => q.FindStr(haystack, needle, start) as Query<number>;
 
 /**
@@ -42,9 +43,10 @@ export const findStr = (needle: Arg<string>, start?: Arg<number>) => (
  */
 export const findStrRegex = (
   pattern: Arg<string>,
+  haystack: Arg<string>,
   start?: Arg<number>,
   max_results?: Arg<number>
-) => (haystack: Arg<string>) =>
+) =>
   q.FindStr(haystack, pattern, start, max_results) as Query<
     { start: number; end: number; data: string }[]
   >;
@@ -52,7 +54,8 @@ export const findStrRegex = (
 /**
  * Formats arguments as a string according to a string of format specifiers.
  */
-export const format = (format: Arg<string>) => (
+export const format = (
+  format: Arg<string>,
   x: Arg<string> | Arg<Array<unknown>>
 ) => q.Format(format, x) as Query<string>;
 
@@ -64,7 +67,7 @@ export const lTrim = (x: Arg<string>) => q.LTrim(x) as Query<string>;
 /**
  * Returns the length in codepoints of a string.
  */
-export const length = (item: Arg<string>): Query<number> => q.Length(item);
+export const length = (item: Arg<string>) => q.Length(item) as Query<number>;
 
 /**
  * Converts a string to all lowercase.
@@ -85,15 +88,17 @@ export const regexEscape = (x: Arg<string>) =>
 /**
  * Creates a new string by repeating a string multiple times.
  */
-export const repeat = (n?: Arg<number>) => (x: Arg<string>) =>
+export const repeat = (n: Arg<number>, x: Arg<string>) =>
   q.Repeat(x, n) as Query<string>;
 
 /**
  * Replaces a portion of a string with another string.
  */
-export const replaceStr = (needle: Arg<string>, replacement: Arg<string>) => (
+export const replaceStr = (
+  needle: Arg<string>,
+  replacement: Arg<string>,
   x: Arg<string>
-) => q.ReplaceStr(x, needle, replacement);
+) => q.ReplaceStr(x, needle, replacement) as Query<string>;
 
 /**
  * Replaces a pattern in a string with another string.
@@ -101,8 +106,9 @@ export const replaceStr = (needle: Arg<string>, replacement: Arg<string>) => (
 export const replaceStrRegex = (
   pattern: Arg<string>,
   replacement: Arg<string>,
+  x: Arg<string>,
   firstOnly?: Arg<boolean>
-) => (x: Arg<string>) => q.ReplaceStrRegex(x, pattern, replacement, firstOnly);
+) => q.ReplaceStrRegex(x, pattern, replacement, firstOnly) as Query<string>;
 
 /**
  * Creates a whitespace string of the specified size.
@@ -112,14 +118,16 @@ export const space = (size: Arg<number>) => q.Space(size) as Query<string>;
 /**
  * Tests whether a string starts with  specific string.
  */
-export const startsWith = (needle: Arg<string>) => (haystack: Arg<string>) =>
+export const startsWith = (needle: Arg<string>, haystack: Arg<string>) =>
   q.StartsWith(haystack, needle) as Query<boolean>;
 
 /**
  * Returns a portion of a string.
  */
-export const substring = (start: Arg<number>, length?: Arg<number>) => (
-  x: Arg<string>
+export const substring = (
+  start: Arg<number>,
+  x: Arg<string>,
+  length?: Arg<number>
 ) => q.SubString(x, start, length) as Query<string>;
 
 /**
@@ -136,3 +144,5 @@ export const trim = (x: Arg<string>) => q.Trim(x) as Query<string>;
  * Converts a string to all uppercase.
  */
 export const upperCase = (x: Arg<string>) => q.UpperCase(x) as Query<string>;
+
+export const toString = (x: Arg) => q.ToString(x) as Query<string>;

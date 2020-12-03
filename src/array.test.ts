@@ -52,13 +52,13 @@ describe('array', () => {
   });
 
   test('append', () => {
-    const result = pipe(numArr, append([1, 2, 3]));
+    const result = append([1, 2, 3], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Append([1, 2, 3], numArr));
     // @ts-expect-error
-    pipe(strArr, append(numArr));
+    append(numArr, strArr);
     // @ts-expect-error
-    pipe(4, append(12));
+    append(12, 4);
   });
 
   test('count', () => {
@@ -70,7 +70,13 @@ describe('array', () => {
   });
 
   test('difference', () => {
-    const result = pipe(numArr, difference([1, 2, 3], [4, 5, 6]));
+    const result = difference(
+      [
+        [1, 2, 3],
+        [4, 5, 6],
+      ],
+      numArr
+    );
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Difference(numArr, [1, 2, 3], [4, 5, 6]));
   });
@@ -82,13 +88,13 @@ describe('array', () => {
   });
 
   test('drop', () => {
-    const result = pipe(strArr, drop(5));
+    const result = drop(5, strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Drop(5, strArr));
   });
 
   test('take', () => {
-    const result = pipe(strArr, take(5));
+    const result = take(5, strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Take(5, strArr));
   });
@@ -104,27 +110,25 @@ describe('array', () => {
   });
 
   test('filter', () => {
-    const data = strArr;
-    const result = pipe(data, filter(equals('hello')));
+    const result = filter((b) => equals('hello', b), strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
-    expect(result).toEqual(q.Filter(data, (b) => q.Equals('hello', b)));
+    expect(result).toEqual(q.Filter(strArr, (b) => q.Equals('hello', b)));
   });
 
   test('foreach', () => {
-    const doForeach = foreach(length);
-    const result = doForeach(strArr);
+    const result = foreach(length, strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Foreach(strArr, (item) => q.Length(item)));
   });
 
   test('intersection', () => {
-    const result = pipe(numArr, intersection([1, 2, 3], [4, 5, 6]));
+    const result = intersection([1, 2, 3], [4, 5, 6], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Intersection([1, 2, 3], [4, 5, 6], numArr));
   });
 
   test('union', () => {
-    const result = pipe(numArr, union([1, 2, 3], [4, 5, 6]));
+    const result = union([1, 2, 3], [4, 5, 6], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Union([1, 2, 3], [4, 5, 6], numArr));
   });
@@ -143,7 +147,7 @@ describe('array', () => {
 
   test('map', () => {
     const data = strArr;
-    const result = pipe(data, map(length));
+    const result = map(length, data);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Map(data, (item) => q.Length(item)));
   });
@@ -175,14 +179,13 @@ describe('array', () => {
   });
 
   test('prepend', () => {
-    const result = pipe(numArr, prepend([1, 2, 3]));
+    const result = prepend([1, 2, 3], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Prepend([1, 2, 3], numArr));
   });
 
   test('reduce', () => {
-    const doReduction = reduce(add(), 0);
-    const result = doReduction(numArr);
+    const result = reduce((x, y) => add([x, y]), 0, numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(
       q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr)

@@ -17,3 +17,5 @@ export * from './write';
 export * from './misc';
 
 export * from './tuple';
+export * from './types';
+export * from './query';

@@ -1,13 +1,12 @@
-import { Arg, Cursor, Page, q, Query, Ref, Result } from './types';
+import { Arg, Cursor, Page, q, Query, Ref } from './types';
 
-export const get: <T = unknown>(
-  r: Arg<Ref<T>>
-) => Query<{ ref: Ref<T>; data: T; ts: number }> = (name) => q.Get(name);
+export const get = <T = unknown>(ref: Arg<Ref<T>>) =>
+  q.Get(ref) as Query<{ ref: Ref<T>; data: T; ts: number }>;
 
-export const paginate = (
+export const paginate = <T>(
+  results: Arg<T>,
   opts: Arg<{ before?: Cursor; after?: Cursor; size?: number }> = {}
-) => <T = unknown>(results: Arg<Ref<T>>): Query<Page<Result<T>>> =>
-  q.Paginate(results, opts);
+) => q.Paginate(results, opts) as Query<Page<T>>;
 
 /**
  * Retrieves a key based on its secret.

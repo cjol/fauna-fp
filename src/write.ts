@@ -1,6 +1,7 @@
 import {
   Arg,
   Query,
+  Document,
   q,
   Ref,
   Timestamp,
@@ -16,6 +17,7 @@ export const create = <T = unknown>(
   collection: Arg<string | Ref<Collection<T>>>,
   params: Arg<{
     data: T;
+    credentials?: { password: string };
     ttl?: Timestamp;
   }>
 ) =>
@@ -77,10 +79,6 @@ export const createFunction = <
     // TODO: I don't yet have a runtime representation of Query objects
     body: unknown;
   }>;
-interface Document<T> {
-  ref: Ref<T>;
-  data: T;
-}
 
 interface SourceObject<O> {
   collection: Ref<Collection<O>> | '_';
@@ -95,7 +93,7 @@ export const createIndex = <
 >(
   params: Arg<{
     name: string;
-    source: Ref<Collection<O>> | Array<SourceObject<O>>;
+    source: Arg<Ref<Collection<O>>> | Arg<Array<SourceObject<O>>>;
     terms?: Array<{ binding: string } | { field: string[] }>;
     values?: Array<
       { reverse?: boolean } & ({ binding: string } | { field: string[] })
@@ -108,7 +106,7 @@ export const createIndex = <
   q.CreateIndex(params) as Query<{
     ref: Ref<FaunaFunction<I, O, D>>;
     name: string;
-    source: unknown[];
+    source: Ref<Collection<O>> | Array<SourceObject<O>>;
     active: boolean;
     partitions: number;
     ts: Timestamp;
@@ -203,6 +201,7 @@ export const replace = <T>(
 export const update = <T>(
   ref: Arg<Ref<T>>,
   params: Arg<{
+    credentials?: { password: string };
     data: Partial<T>;
   }>
 ) =>
