@@ -40,6 +40,8 @@ const emailValidator = compose(select("email"), containsStrRegex("^.+@.+..+$"));
 // passwordValidator: (x: Arg<{password: string}>) => Query<boolean> (inferred automatically)
 const passwordValidator = compose(select("password"), length, gte(8));
 
+const usersCollection = collection<User>("users");
+
 const validate = <T>(f: (x: Arg<T>) => Query<boolean>) => (x: Arg<T>) =>
   iff(f(x), x, abort("invalid data")); // inferred as Query<T>
 
@@ -52,18 +54,42 @@ const register = compose(
 );
 ```
 
+![Image showing type inference of newUser variable](./assets/userType.png)
+
+![Image showing type inference of insertedEmail variable](./assets/emailType.png)
+
 <details>
   <summary>Plain FQL version</summary>
-  
-    Here's what the query above might look like in "vanilla" FQL. 
-  ```javascript
-  ```
-  
+
+Here's what the query above might look like in "vanilla" FQL.
+
+```ts
+const Validator = (f: (x: ExprArg) => ExprArg) => (x: ExprArg) =>
+  q.If(f(x), x, q.Abort("invalid data"));
+
+const PasswordValidator = Validator((x) =>
+  q.GTE([8, q.Length(q.Select(["password"], x))])
+);
+
+const EmailValidator = Validator((x) =>
+  q.ContainsStrRegex(q.Select(["email"], x), "^.+@.+..+$")
+);
+
+const Register = (x: User) =>
+  q.Create(q.Collection("users"), {
+    data: PasswordValidator(EmailValidator(x)),
+  });
+
+const NewUser = Register({ email: "", password: "" });
+
+const Email = q.Select(["data", "email"], newUser);
+```
+
 </details>
 
 ## Status
 
-Totally unstable.
+Experimental. See some [test files](./src/index.test.ts) for example usage.
 
 I think a critical advantage of this library comes from getting the types right, so
 I have started there. I did try to add function composition at the same time, but
@@ -95,3 +121,7 @@ These opaque types allow me to represent the conceptual types being
 represented by the various FQL datatypes, withouot coupling toabout the
 internal structure, and while safeguarding myself from future changes to this
 structure.
+
+```
+
+```

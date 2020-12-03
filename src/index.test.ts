@@ -164,21 +164,25 @@ describe("misc", () => {
 
     const Validator = (f: (x: ExprArg) => ExprArg) => (x: ExprArg) =>
       q.If(f(x), x, q.Abort("invalid data"));
+
     const PasswordValidator = Validator((x) =>
       q.GTE([8, q.Length(q.Select(["password"], x))])
     );
+
     const EmailValidator = Validator((x) =>
       q.ContainsStrRegex(q.Select(["email"], x), "^.+@.+..+$")
     );
 
-    expect(insertedEmail).toEqual(
-      q.Select(
-        ["data", "email"],
-        q.Create(q.Collection("users"), {
-          data: PasswordValidator(EmailValidator({ email: "", password: "" })),
-        })
-      )
-    );
+    const Register = (x: User) =>
+      q.Create(q.Collection("users"), {
+        data: PasswordValidator(EmailValidator(x)),
+      });
+
+    const NewUser = Register({ email: "", password: "" });
+
+    const Email = q.Select(["data", "email"], newUser);
+
+    expect(insertedEmail).toEqual(Email);
 
     // @ts-expect-error
     register({ password: "" });
