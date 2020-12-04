@@ -27,10 +27,12 @@ import { q } from './types.internal';
 /**
  * Combines the items in a set with set’s indexed values.
  */
-export const join = <O, T extends any[]>(
-  detail: Arg<Index<O, T> | Callback<T, O>>,
-  source: Arg<T[]>
-) => q.Join(source, detail) as Query<QueryResult<O>[]>;
+export function join<O, T extends any[]>(detail: Arg<Index<T, O> | Callback<T, O>>): (source: Arg<T[]>) => Query<QueryResult<O>[]>
+export function join<O, T extends any[]>(detail: Arg<Index<T, O> | Callback<T, O>>, source: Arg<T[]>): Query<QueryResult<O>[]>
+export function join<O, T extends any[]>(detail: Arg<Index<T, O> | Callback<T, O>>, source?: Arg<T[]>) {
+  if (source === undefined) return (source: Arg<T[]>) => join(detail, source);
+  return q.Join(source, detail);
+}
 
 /**
  * The `Match` function finds the "search terms" provided to `Match` in the
@@ -46,10 +48,12 @@ export const join = <O, T extends any[]>(
  * If `Match` only returns a single document, or only the first document is
  * needed, `Get` may be used to retrieve the document.
  */
-export const match = <T, I extends any[]>(
-  index: Arg<Ref<Index<T, I>>>,
-  terms: ArgTuple<I>
-) => q.Match(index, ...terms) as Query<T>;
+export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>): (terms: ArgTuple<I>) => Query<T>;
+export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>, terms: ArgTuple<I>): Query<T>;
+export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>, terms?: ArgTuple<I>) {
+  if (terms === undefined) return (terms: ArgTuple<I>) => match(index, terms);
+  return q.Match(index, ...terms);
+}
 
 // Max: defined in array
 // Mean: defined in array
@@ -58,15 +62,24 @@ export const match = <T, I extends any[]>(
 /**
  * Returns a subset of a set, in the specified range.
  */
-export const range = <T>(start: Arg<T>, end: Arg<T>, set: Arg<T[]>) =>
-  q.Range(set, start, end) as Query<QueryResult<T>[]>;
+export function range<T>(start: Arg<T>):
+  ((end: Arg<T>, set: Arg<T[]>) => Query<QueryResult<T>[]>) &
+  ((end: Arg<T>) => (set: Arg<T[]>) => Query<QueryResult<T>[]>);
+export function range<T>(start: Arg<T>, end: Arg<T>): (set: Arg<T[]>) => Query<QueryResult<T>[]>;
+export function range<T>(start: Arg<T>, end: Arg<T>, set: Arg<T[]>): Query<QueryResult<T>[]>;
+export function range<T>(start: Arg<T>, end?: Arg<T>, set?: Arg<T[]>) {
+  if (end === undefined) return (end: Arg<T>, set?: Arg<T[]>) => set === undefined ? range(start, end) : range(start, end, set);
+  if (set === undefined) return (set: Arg<T[]>) => range(start, end, set);
+  return q.Range(set, start, end);
+}
 
 // Reduce: defined in array
 // Reverse: defined in array
 
 // Singleton: TODO
-export const singleton = <T>(item: Arg<T>) =>
-  q.Singleton(item) as Query<QueryResult<T>[]>;
+export function singleton<T>(item: Arg<T>): Query<QueryResult<T>[]> {
+  return q.Singleton(item);
+}
 
 // Sum: defined in array
 // Union: defined in array

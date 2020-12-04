@@ -4,146 +4,249 @@ import { q } from './types.internal';
 /**
  * Converts a string into a case-normalized string.
  */
-export const casefold = (str: Arg<string>) => q.Casefold(str) as Query<string>;
+export function casefold(str: Arg<string>): Query<string> {
+  return q.Casefold(str);
+}
+
+/**
+ * Combines a list of strings into a single string using the given separator.
+ */
+export function concatSep(sep: Arg<string>): (strs: Arg<string[]>) => Query<string>;
+export function concatSep(sep: Arg<string>, strs: Arg<string[]>): Query<string>;
+export function concatSep(sep: Arg<string>, strs?: Arg<string[]>) {
+  if (strs === undefined) return (strs: Arg<string[]>) => concatSep(sep, strs);
+  return q.Concat(strs, sep);
+}
 
 /**
  * Combines a list of strings into a single string.
  */
-export const concat = (strs: Arg<string[]>, sep?: Arg<string>) =>
-  q.Concat(strs, sep) as Query<string>;
+export function concat(strs: Arg<string[]>): Query<string> {
+  return q.Concat(strs);
+}
 
 /**
  * Tests whether a string contains a specific string.
  */
-export const containsStr = (needle: Arg<string>, haystack: Arg<string>) =>
-  q.ContainsStr(haystack, needle) as Query<boolean>;
+export function containsStr(needle: Arg<string>): (haystack: Arg<string>) => Query<boolean>;
+export function containsStr(needle: Arg<string>, haystack: Arg<string>): Query<boolean>;
+export function containsStr(needle: Arg<string>, haystack?: Arg<string>) {
+  if (haystack === undefined) return (haystack: Arg<string>) => containsStr(needle, haystack)
+  return q.ContainsStr(haystack, needle);
+}
 
 /**
  * Tests whether a string contains a specific pattern.
  */
-export const containsStrRegex = (pattern: Arg<string>, haystack: Arg<string>) =>
-  q.ContainsStrRegex(haystack, pattern) as Query<boolean>;
+export function containsStrRegex(pattern: Arg<string>): (haystack: Arg<string>) => Query<boolean>;
+export function containsStrRegex(pattern: Arg<string>, haystack: Arg<string>): Query<boolean>;
+export function containsStrRegex(pattern: Arg<string>, haystack?: Arg<string>) {
+  if (haystack === undefined) return (haystack: Arg<string>) => containsStrRegex(pattern, haystack)
+  return q.ContainsStrRegex(haystack, pattern);
+}
 
 /**
  * Tests whether a string ends with a specific string.
  */
-export const endsWith = (needle: Arg<string>, haystack: Arg<string>) =>
-  q.EndsWith(haystack, needle) as Query<boolean>;
+export function endsWith(needle: Arg<string>): (haystack: Arg<string>) => Query<boolean>;
+export function endsWith(needle: Arg<string>, haystack: Arg<string>): Query<boolean>;
+export function endsWith(needle: Arg<string>, haystack?: Arg<string>) {
+  if (haystack === undefined) return (haystack: Arg<string>) => endsWith(needle, haystack)
+  return q.EndsWith(haystack, needle);
+}
 
+
+interface FindStrParams {
+  find: Arg<string>;
+  start?: Arg<number>
+}
 /**
  * Searches for a string within a string.
  */
-export const findStr = (
-  needle: Arg<string>,
-  haystack: Arg<string>,
-  start?: Arg<number>
-) => q.FindStr(haystack, needle, start) as Query<number>;
+export function findStr(needle: Arg<string>): (haystack: Arg<string>) => Query<number>;
+export function findStr(needle: Arg<string>, haystack: Arg<string>): Query<number>;
+export function findStr(needle: FindStrParams): (haystack: Arg<string>) => Query<number>;
+export function findStr(needle: FindStrParams, haystack: Arg<string>): Query<number>;
+export function findStr(maybeNeedle: Arg<string> | FindStrParams, haystack?: Arg<string>) {
+  const needle: FindStrParams = (typeof maybeNeedle === "object" && "find" in maybeNeedle) ? maybeNeedle : { find: maybeNeedle }
+  if (haystack === undefined) return (haystack: Arg<string>) => findStr(needle, haystack)
+  return q.FindStr(haystack, needle.find, needle.start);
+}
 
+interface FindStrRegexParams {
+  pattern: Arg<string>;
+  max_results?: Arg<string>;
+  start?: Arg<number>
+}
+interface FindStrRegexResult {
+  start: number;
+  end: number;
+  data: string;
+}
 /**
  * Searches for a regex pattern within a string.
  */
-export const findStrRegex = (
-  pattern: Arg<string>,
-  haystack: Arg<string>,
-  start?: Arg<number>,
-  max_results?: Arg<number>
-) =>
-  q.FindStr(haystack, pattern, start, max_results) as Query<
-    { start: number; end: number; data: string }[]
-  >;
+export function findStrRegex(needle: Arg<string>): (haystack: Arg<string>) => Query<FindStrRegexResult[]>;
+export function findStrRegex(needle: Arg<string>, haystack: Arg<string>): Query<FindStrRegexResult[]>;
+export function findStrRegex(needle: FindStrRegexParams): (haystack: Arg<string>) => Query<FindStrRegexResult[]>;
+export function findStrRegex(needle: FindStrRegexParams, haystack: Arg<string>): Query<FindStrRegexResult[]>;
+export function findStrRegex(maybeNeedle: Arg<string> | FindStrRegexParams, haystack?: Arg<string>) {
+  const needle: FindStrRegexParams = (typeof maybeNeedle === "object" && "pattern" in maybeNeedle) ? maybeNeedle : { pattern: maybeNeedle }
+  if (haystack === undefined) return (haystack: Arg<string>) => findStrRegex(needle, haystack)
+  return q.FindStrRegex(haystack, needle.pattern, needle.start, needle.max_results);
+}
 
 /**
  * Formats arguments as a string according to a string of format specifiers.
  */
-export const format = (
-  format: Arg<string>,
-  x: Arg<string> | Arg<Array<unknown>>
-) => q.Format(format, x) as Query<string>;
+// TODO: consider using TS 4.1 template literal types to derive a correct type for the param array
+export function format(fmt: Arg<string>): (x: Arg<Array<unknown>>) => Query<string>;
+export function format(fmt: Arg<string>, x: Arg<Array<unknown>>): Query<string>;
+export function format(fmt: Arg<string>, x?: Arg<Array<unknown>>) {
+  if (x === undefined) return (x: Arg<Array<unknown>>) => format(fmt, x)
+  return q.Format(fmt, x);
+}
 
 /**
  * Removes all whitespace from the start of a string.
  */
-export const lTrim = (x: Arg<string>) => q.LTrim(x) as Query<string>;
+export function lTrim(x: Arg<string>): Query<string> {
+  return q.LTrim(x);
+}
 
 /**
  * Returns the length in codepoints of a string.
  */
-export const length = (item: Arg<string>) => q.Length(item) as Query<number>;
+export function length(item: Arg<string>): Query<number> {
+  return q.Length(item);
+}
 
 /**
  * Converts a string to all lowercase.
  */
-export const lowercase = (x: Arg<string>) => q.LowerCase(x) as Query<string>;
+export function lowercase(x: Arg<string>): Query<string> {
+  return q.LowerCase(x);
+}
 
 /**
  * Removes all whitespace from the end of a string.
  */
-export const rTrim = (x: Arg<string>) => q.RTrim(x) as Query<string>;
+export function rTrim(x: Arg<string>): Query<string> {
+  return q.RTrim(x);
+}
 
 /**
  * Creates a regular expression that matches the input string verbatim.
  */
-export const regexEscape = (x: Arg<string>) =>
-  q.RegexEscape(x) as Query<string>;
+export function regexEscape(x: Arg<string>): Query<string> {
+  return q.RegexEscape(x);
+}
 
 /**
  * Creates a new string by repeating a string multiple times.
  */
-export const repeat = (n: Arg<number>, x: Arg<string>) =>
-  q.Repeat(x, n) as Query<string>;
+export function repeat(n: Arg<number>): (x: Arg<string>) => Query<string>;
+export function repeat(n: Arg<number>, x: Arg<string>): Query<string>;
+export function repeat(n: Arg<number>, x?: Arg<string>) {
+  if (x === undefined) return (x: Arg<string>) => repeat(n, x);
+  return q.Repeat(x, n);
+}
 
 /**
  * Replaces a portion of a string with another string.
  */
-export const replaceStr = (
-  needle: Arg<string>,
-  replacement: Arg<string>,
-  x: Arg<string>
-) => q.ReplaceStr(x, needle, replacement) as Query<string>;
+export function replaceStr(needle: Arg<string>, replacement: Arg<string>, haystack: Arg<string>): Query<string>;
+export function replaceStr(needle: Arg<string>, replacement: Arg<string>): (haystack: Arg<string>) => Query<string>;
+export function replaceStr(needle: Arg<string>): (replacement: Arg<string>, haystack: Arg<string>) => Query<string>;
+export function replaceStr(needle: Arg<string>): (replacement: Arg<string>) => (haystack: Arg<string>) => Query<string>;
+export function replaceStr(needle: Arg<string>, replacement?: Arg<string>, haystack?: Arg<string>) {
+  if (replacement === undefined) {
+    return (replacement: Arg<string>, haystack?: Arg<string>) => {
+      if (haystack === undefined) return replaceStr(needle, replacement)
+      return replaceStr(needle, replacement, haystack);
+    }
+  }
+  if (haystack === undefined) return (haystack: Arg<string>) => replaceStr(needle, replacement, haystack);
+
+  return q.ReplaceStr(haystack, needle, replacement);
+}
 
 /**
  * Replaces a pattern in a string with another string.
  */
-export const replaceStrRegex = (
-  pattern: Arg<string>,
-  replacement: Arg<string>,
-  x: Arg<string>,
-  firstOnly?: Arg<boolean>
-) => q.ReplaceStrRegex(x, pattern, replacement, firstOnly) as Query<string>;
+export function replaceStrRegex(pattern: Arg<string>, replacement: Arg<string>, haystack: Arg<string>): Query<string>;
+export function replaceStrRegex(pattern: Arg<string>, replacement: Arg<string>): (haystack: Arg<string>) => Query<string>;
+export function replaceStrRegex(pattern: Arg<string>): (replacement: Arg<string>, haystack: Arg<string>) => Query<string>;
+export function replaceStrRegex(pattern: Arg<string>): (replacement: Arg<string>) => (haystack: Arg<string>) => Query<string>;
+export function replaceStrRegex(pattern: Arg<string>, replacement?: Arg<string>, haystack?: Arg<string>) {
+  if (replacement === undefined) {
+    return (replacement: Arg<string>, haystack?: Arg<string>) => {
+      if (haystack === undefined) return replaceStrRegex(pattern, replacement)
+      return replaceStrRegex(pattern, replacement, haystack);
+    }
+  }
+  if (haystack === undefined) return (haystack: Arg<string>) => replaceStrRegex(pattern, replacement, haystack);
+
+  return q.ReplaceStrRegex(haystack, pattern, replacement);
+}
 
 /**
  * Creates a whitespace string of the specified size.
  */
-export const space = (size: Arg<number>) => q.Space(size) as Query<string>;
+export function space(size: Arg<number>): Query<string> {
+  return q.Space(size);
+}
 
 /**
  * Tests whether a string starts with  specific string.
  */
-export const startsWith = (needle: Arg<string>, haystack: Arg<string>) =>
-  q.StartsWith(haystack, needle) as Query<boolean>;
+export function startsWith(needle: Arg<string>): (haystack: Arg<string>) => Query<boolean>;
+export function startsWith(needle: Arg<string>, haystack: Arg<string>): Query<boolean>;
+export function startsWith(needle: Arg<string>, haystack?: Arg<string>) {
+  if (haystack === undefined) return (haystack: Arg<string>) => startsWith(needle, haystack)
+  return q.StartsWith(haystack, needle);
+}
 
+
+interface SubstringParam {
+  start: Arg<number>;
+  length?: Arg<number>
+}
 /**
  * Returns a portion of a string.
  */
-export const substring = (
-  start: Arg<number>,
-  x: Arg<string>,
-  length?: Arg<number>
-) => q.SubString(x, start, length) as Query<string>;
+export function substring(start: SubstringParam): (x: Arg<string>) => Query<string>;
+export function substring(start: Arg<number>): (x: Arg<string>) => Query<string>;
+export function substring(start: SubstringParam, x: Arg<string>): Query<string>;
+export function substring(start: Arg<number>, x: Arg<string>): Query<string>;
+export function substring(maybeStart: Arg<number> | SubstringParam, x?: Arg<string>) {
+  const start: SubstringParam =
+    (typeof maybeStart === "object" && "start" in maybeStart) ? maybeStart : { start: maybeStart };
+  if (x === undefined) return (x: Arg<string>) => substring(start, x);
+  return q.SubString(x, start.start, start.length)
+}
 
 /**
  * Converts a string to use TitleCase.
  */
-export const titleCase = (x: Arg<string>) => q.TitleCase(x) as Query<string>;
+export function titleCase(x: Arg<string>): Query<string> {
+  return q.TitleCase(x);
+}
 
 /**
  * Removes all whitespace from the start and end of a string.
  */
-export const trim = (x: Arg<string>) => q.Trim(x) as Query<string>;
+export function trim(x: Arg<string>): Query<string> {
+  return q.Trim(x);
+}
 
 /**
  * Converts a string to all uppercase.
  */
-export const upperCase = (x: Arg<string>) => q.UpperCase(x) as Query<string>;
+export function upperCase(x: Arg<string>): Query<string> {
+  return q.UpperCase(x);
+}
 
-export const toString = (x: Arg) => q.ToString(x) as Query<string>;
+export function toString(x: Arg): Query<string> {
+  return q.ToString(x);
+}

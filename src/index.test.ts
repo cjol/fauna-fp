@@ -7,7 +7,7 @@ import { flow, pipe } from 'fp-ts/function';
 import { abort, iff } from './basic';
 import { select } from './object';
 import { gte, equals } from './logic';
-import { create, get, index, paginate } from '.';
+import { create, get, index, paginate, paginateOpts } from '.';
 import { collection, ref } from './database';
 import { match } from './set';
 
@@ -82,13 +82,13 @@ describe('misc', () => {
     }
 
     const usersCollection = collection<User>('users');
-    const commentsByUser = index<Ref<Comment>, [Ref<User>, string]>(
+    const commentsByUser = index<[Ref<User>, string], Ref<Comment>>(
       'tagged_comments_by_user'
     );
     const getUserComments = (id: string, tag: string) => {
       const userRef = ref(usersCollection, id);
       const m = match(commentsByUser, [userRef, tag]);
-      const commentsPage = paginate(m, { size: 10 });
+      const commentsPage = paginateOpts({ size: 10 }, m);
 
       return map((commentRef) => {
         const commentDoc = get(commentRef);

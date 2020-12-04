@@ -16,15 +16,13 @@ import { q } from './types.internal';
 /**
  * Create a key.
  */
-export const createKey = <D>(
-  params: Arg<{
-    role: string | Ref<Role> | Array<Ref<Role>>;
-    name?: string;
-    data?: D;
-    database?: Ref<Database>;
-  }>
-) =>
-  q.CreateKey(params) as Query<{
+export function createKey<D>(params: Arg<{
+  role: string | Ref<Role> | Array<Ref<Role>>;
+  name?: string;
+  data?: D;
+  database?: Ref<Database>;
+}>) {
+  return q.CreateKey(params) as Query<{
     ref: Ref<Key<QueryResult<D>>>;
     database: Ref<Database>;
     role: string;
@@ -33,65 +31,78 @@ export const createKey = <D>(
     secret: string;
     hashed_secret: string;
   }>;
+}
 
 /**
  * Provides a reference to the internal credentials collection.
  */
-export const credentials = <I = unknown, D = unknown>() =>
-  q.Credentials() as Collection<Credentials<QueryResult<I>, QueryResult<D>>>;
+export function credentials<I = unknown, D = unknown>(): Collection<Credentials<QueryResult<I>, QueryResult<D>>> {
+  return q.Credentials();
+}
 
 /**
  * Checks whether the current client has credentials.
  */
-export const hasIdentity = () => q.HasIdentity() as Query<boolean>;
+export function hasIdentity(): Query<boolean> {
+  return q.HasIdentity();
+}
 
 /**
  * Verifies an identity’s credentials.
  */
-
-export const identify = (doc: Arg<Ref<any>>, password: Arg<string>) =>
-  q.Identify(doc, password) as Query<boolean>;
+export function identify(doc: Arg<Ref<any>>): (password: Arg<string>) => Query<boolean>;
+export function identify(doc: Arg<Ref<any>>, password: Arg<string>): Query<boolean>;
+export function identify(doc: Arg<Ref<any>>, password?: Arg<string>) {
+  if (password !== undefined) return q.Identify(doc, password);
+  return (password: Arg<string>) => identify(doc, password);
+}
 
 /**
  * Fetches the identity’s auth token.
  */
-export const identity = <T = unknown>() =>
-  q.Identity() as Query<Ref<QueryResult<T>>>;
+export function identity<T = unknown>(): Query<Ref<QueryResult<T>>> {
+  return q.Identity();
+}
 
 // keyFromSecret defined in `read`
 
 /**
  * Retrieves the keys associated with the specified database.
  */
-export const keys = <D = unknown>() =>
-  q.Keys() as Collection<Key<QueryResult<D>>>;
+export function keys<D = unknown>(): Collection<Key<QueryResult<D>>> {
+  return q.Keys();
+}
 
+interface LoginParams<D> {
+  password: string;
+  data?: QueryResult<D>;
+  ttl?: Timestamp;
+}
+interface LoginResult<D, T> {
+  ref: Ref<Token<QueryResult<D>>>;
+  ts: number;
+  instance: Ref<QueryResult<T>>;
+  secret: string;
+}
 /**
  * Creates an auth token for an identity.
  */
-export const login = <D = unknown, T = unknown>(
-  identity: Arg<Ref<QueryResult<T>>>,
-  params: Arg<{
-    password: string;
-    data?: QueryResult<D>;
-    ttl?: Timestamp;
-  }>
-) =>
-  q.Login(identity, params) as Query<{
-    ref: Ref<Token<QueryResult<D>>>;
-    ts: number;
-    instance: Ref<QueryResult<T>>;
-    secret: string;
-  }>;
+export function login<T = unknown>(identity: Arg<Ref<QueryResult<T>>>): <D = unknown>(params: Arg<LoginParams<D>>) => Query<LoginResult<D, T>>;
+export function login<D = unknown, T = unknown>(identity: Arg<Ref<QueryResult<T>>>, params: Arg<LoginParams<D>>): Query<LoginResult<D, T>>;
+export function login<D = unknown, T = unknown>(identity: Arg<Ref<QueryResult<T>>>, params?: Arg<LoginParams<D>>) {
+  return q.Login(identity, params);
+}
 
 /**
  * Logs out of the current (or all) sessions.
  */
-export const logout = (all_tokens: Arg<boolean>) =>
-  q.Logout(all_tokens) as Query<boolean>;
+export function logout(allTokens: Arg<boolean>): Query<boolean> {
+  return q.Logout(allTokens);
+}
 
 /**
  * Provides a reference to the internal tokens collection.
  */
-export const otkens = <D = unknown>() =>
-  q.Tokens() as Collection<Token<QueryResult<D>>>;
+export function tokens<D = unknown>(): Collection<Token<QueryResult<D>>> {
+  return q.Tokens();
+}

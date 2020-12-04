@@ -1,9 +1,10 @@
 import { Arg, Query } from './types';
 import { q } from './types.internal';
 
-export const isNull = (arg: Arg<unknown>) => q.IsNull(arg) as Query<boolean>;
+export function isNull(arg: Arg<unknown>): Query<boolean> {
+  return q.IsNull(arg);
+}
 
-export const isString = (arg: Arg<unknown>) =>
-  q.IsString(arg) as Query<boolean>;
-
-// TODO: type check functions
+export function isString(arg: Arg<unknown>): Query<boolean> {
+  return q.IsString(arg);
+}

@@ -59,7 +59,7 @@ export interface Collection<T = unknown, D = unknown>
 
 export interface Database<T = unknown> extends Type<'Database', { data: T }> { }
 
-export interface Index<T = unknown, O extends Arg[] = []>
+export interface Index<O extends Arg[] = [], T = unknown>
   extends Type<
   'Index',
   {
@@ -88,7 +88,7 @@ export interface Ref<T = unknown> extends Type<'Ref', { type: T }> {
 export interface FaunaFunction<I extends Arg[], O, D = unknown>
   extends Type<'Function', { data: D; terms: I; result: O }> { }
 
-export type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<T>>;
+export type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<any, T>>;
 
 // finally, some useful data structures
 

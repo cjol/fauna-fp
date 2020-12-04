@@ -40,15 +40,15 @@ export function merge<AVal, BVal>(resolver: Callback<[string, AVal, BVal], AVal 
 export function merge(param1: any, param2?: any, param3?: any) {
   if (typeof param1 === 'function') {
     const resolver = param1;
-    if (param2) {
-      if (param3) {
+    if (param2 !== undefined) {
+      if (param3 !== undefined) {
         return q.Merge(param2, param3, resolver);
       }
       return (param3: any) => merge(resolver, param2, param3);
     }
     return curry((param2: any, param3: any) => merge(resolver, param2, param3));
   }
-  if (param2) {
+  if (param2 !== undefined) {
     return q.Merge(param1, param2);
   }
   return (param2: any) => merge(param1, param2);

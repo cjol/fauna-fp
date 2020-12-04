@@ -4,25 +4,39 @@ import { q } from './types.internal';
 /**
  * Returns true if all values are true. Does not handle collections, and short-circuits on false values. Also see `all`.
  */
-export const and = (...a: Arg<boolean>[]) => q.And(...a) as Query<boolean>;
+export function and(...a: Arg<boolean>[]): Query<boolean> {
+  return q.And(...a);
+}
 
 /**
  * Returns true when a specific field is found in a document.
  */
-export const containsField = (field: Arg<string>, obj: Arg) =>
-  q.ContainsField(field, obj) as Query<boolean>;
+export function containsField(field: Arg<string>): (obj: Arg) => Query<boolean>;
+export function containsField(field: Arg<string>, obj: Arg): Query<boolean>;
+export function containsField(field: Arg<string>, obj?: Arg) {
+  if (obj === undefined) return (obj: Arg) => containsField(field, obj);
+  return q.ContainsField(field, obj);
+}
 
 /**
  * Returns true when a document contains a value at the specified path.
  */
-export const containsPath = (path: Arg<Array<string | number>>, obj: Arg) =>
-  q.ContainsPath(path, obj) as Query<boolean>;
+export function containsPath(path: Arg<Array<string | number>>): (obj: Arg) => Query<boolean>;
+export function containsPath(path: Arg<Array<string | number>>, obj: Arg): Query<boolean>;
+export function containsPath(path: Arg<Array<string | number>>, obj?: Arg) {
+  if (obj === undefined) return (obj: Arg) => containsPath(path, obj);
+  return q.ContainsPath(path, obj);
+}
 
 /**
  * Returns true when a specific value is found in a document.
  */
-export const containsValue = (value: Arg, obj: Arg) =>
-  q.ContainsValue(value, obj) as Query<boolean>;
+export function containsValue(value: Arg): (obj: Arg) => Query<boolean>;
+export function containsValue(value: Arg, obj: Arg): Query<boolean>;
+export function containsValue(value: Arg, obj?: Arg) {
+  if (obj === undefined) return (obj: Arg) => containsValue(value, obj);
+  return q.ContainsValue(value, obj);
+}
 
 /**
  * Returns true of all values are equivalent.
@@ -30,41 +44,55 @@ export const containsValue = (value: Arg, obj: Arg) =>
 export function equals<O>(a: Arg<O>): (b: Arg<O>) => Query<boolean>;
 export function equals<O>(a: Arg<O>, b: Arg<O>): Query<boolean>;
 export function equals<O>(a: Arg<O>, b?: Arg<O>) {
-  if (b) return q.Equals(a, b);
+  if (b !== undefined) return q.Equals(a, b);
   return (b: Arg<O>) => equals(a, b);
 }
 
 /**
  * Returns true if a document has an event at a specific time.
  */
-export const exists = <O>(ref: Arg<Ref<O>>) => q.Exists(ref) as Query<boolean>;
+export function exists<O>(ref: Arg<Ref<O>>): Query<boolean> {
+  return q.Exists(ref);
+}
 
 /**
  * Returns true if each value is greater than all following values.
  */
-export const gt = <T>(as: Arg<T[]>) => q.GT(as) as Query<boolean>;
+export function gt<T>(as: Arg<T[]>): Query<boolean> {
+  return q.GT(as);
+}
 
 /**
  * Returns true if each value is greater than, or equal to, all following values.
  */
-export const gte = <T>(as: Arg<T[]>) => q.GTE(as) as Query<boolean>;
+export function gte<T>(as: Arg<T[]>): Query<boolean> {
+  return q.GTE(as);
+}
 
 /**
  * Returns true if each value is less than all following values.
  */
-export const lt = <T>(as: Arg<T[]>) => q.LT(as) as Query<boolean>;
+export function lt<T>(as: Arg<T[]>): Query<boolean> {
+  return q.LT(as);
+}
 
 /**
  * Returns true if each value is less than, or equal to, all following values.
  */
-export const lte = <T>(as: Arg<T[]>) => q.LTE(as) as Query<boolean>;
+export function lte<T>(as: Arg<T[]>): Query<boolean> {
+  return q.LTE(as);
+}
 
 /**
  * Returns the opposite of a boolean expression.
  */
-export const not = (b: Arg<boolean>) => q.Not(b) as Query<boolean>;
+export function not(b: Arg<boolean>): Query<boolean> {
+  return q.Not(b);
+}
 
 /**
  * Returns true if any value is true.
  */
-export const or = (...a: Arg<boolean>[]) => q.Or(...a) as Query<boolean>;
+export function or(...a: Arg<boolean>[]): Query<boolean> {
+  return q.Or(...a);
+}

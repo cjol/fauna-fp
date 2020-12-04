@@ -15,9 +15,8 @@ import {
   not,
   or,
 } from './logic';
-import { pipe, tuple } from 'fp-ts/lib/function';
+import { pipe, } from 'fp-ts/lib/function';
 import { add } from './number';
-import { spread } from './tuple';
 import { collection, ref } from './database';
 describe('control flow', () => {
   test('and', () => {

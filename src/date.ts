@@ -1,9 +1,14 @@
 import { Arg, Query, Timestamp } from './types';
 import { q } from './types.internal';
 
-// TODO: time and date functions
-export const now = () => q.Now() as Query<Timestamp>;
+export function now(): Query<Timestamp> {
+    return q.Now();
+}
 
-export const toSeconds = (x: Arg<Timestamp>) => q.ToSeconds(x) as Query<number>;
+export function toSeconds(x: Arg<Timestamp>): Query<number> {
+    return q.ToSeconds(x);
+}
 
-export const time = (x: Arg<string>) => q.Time(x) as Query<Timestamp>;
+export function time(x: Arg<string>): Query<Timestamp> {
+    return q.Time(x);
+}

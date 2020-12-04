@@ -7,6 +7,7 @@ import { fun } from './database';
 import { length } from './string';
 import { add } from './number';
 import { time } from './date';
+import { pipe } from 'fp-ts/lib/function';
 
 describe('control flow', () => {
   test('abort', () => {
@@ -39,6 +40,13 @@ describe('control flow', () => {
     expect(result).toEqual(q.At(q.Time(t), { name: 'cjol' }));
   });
 
+  test('at curried', () => {
+    const t = '1970-01-01T00:00:00Z';
+    const result = at(time(t))({ name: 'cjol' });
+    expectTypeOf(result).toEqualTypeOf<Query<{ name: string }>>();
+    expect(result).toEqual(q.At(q.Time(t), { name: 'cjol' }));
+  });
+
   test('call', () => {
     const f = fun<[string, string], number>('combine_strings_to_form_number');
     const result = call(f, ['hello', 'world']);
@@ -47,6 +55,20 @@ describe('control flow', () => {
       q.Call(q.Function('combine_strings_to_form_number'), 'hello', 'world')
     );
   });
+
+  test('call curried', () => {
+    const f = fun<[string], string>('reverse_string');
+
+    const callReverse = call(f);
+    const reversedHello = callReverse('hello');
+    const result = pipe(reversedHello, callReverse)
+    expectTypeOf(result).toEqualTypeOf<Query<string>>();
+    expect(result).toEqual(
+      q.Call(q.Function('reverse_string'),
+        q.Call(q.Function('reverse_string'), 'hello'))
+    );
+  });
+
 
   test('doMany', () => {
     const result = doMany('hello', 'world', true);
