@@ -39,16 +39,15 @@ describe('object', () => {
     expectTypeOf(withResolver2).toEqualTypeOf<Query<Merged>>();
     expectTypeOf(withResolver3).toEqualTypeOf<Query<Merged>>();
     expectTypeOf(withResolver4).toEqualTypeOf<Query<Merged>>();
-    expect(withResolver2).toEqual(withResolver1);
-    expect(withResolver3).toEqual(withResolver1);
-    expect(withResolver4).toEqual(withResolver1);
-    expect(withResolver1).toEqual(
-      q.Merge(
-        { foo: true },
-        { bar: false },
-        q.Lambda(['key', 'aVal', 'bVal'], q.Var('aVal'))
-      )
+    const fqlWithResolver = q.Merge(
+      { foo: true },
+      { bar: false },
+      q.Lambda(['key', 'aVal', 'bVal'], q.Var('aVal'))
     );
+    expect(withResolver2).toEqual(fqlWithResolver);
+    expect(withResolver3).toEqual(fqlWithResolver);
+    expect(withResolver4).toEqual(fqlWithResolver);
+    expect(withResolver1).toEqual(fqlWithResolver);
 
     // check that everything works well with a typed resolver
     const mergeOr = merge((x, a: Arg<boolean>, b: Arg<boolean>) => or(a, b));

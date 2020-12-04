@@ -1,9 +1,9 @@
 import { ExprArg, query as q } from 'faunadb';
-import { map, mapPage, mean, reduce } from './array';
+import { map, mean, reduce } from './array';
 import { containsStrRegex, length } from './string';
 import { expectTypeOf } from 'expect-type';
 import { Arg, Page, Query, Ref } from './types';
-import { flow } from 'fp-ts/function';
+import { flow, pipe } from 'fp-ts/function';
 import { abort, iff } from './basic';
 import { select } from './object';
 import { gte, equals } from './logic';
@@ -19,14 +19,15 @@ describe('misc', () => {
   // convoluted example: find the array with the longest average string length, and return the first string.
   // If it's 'HELLO' then return one thing, else return another (note different types are preserved)
   test('max avg string length', () => {
-    const data = [strArr, strArr];
-    const items = map(
-      (x) => ({
-        len: mean(map(length, x)),
-        arr: x,
-      }),
-      data
-    );
+    const data: Page<string[]> = { data: [strArr, strArr] };
+    const items = pipe(
+      data,
+      map(
+        (x) => ({
+          len: pipe(x, map(length), mean),
+          arr: x,
+        }),
+      ));
     const greatest = reduce(
       (curr, next) => {
         const currLen = select(curr, 'len');
@@ -89,7 +90,7 @@ describe('misc', () => {
       const m = match(commentsByUser, [userRef, tag]);
       const commentsPage = paginate(m, { size: 10 });
 
-      return mapPage((commentRef) => {
+      return map((commentRef) => {
         const commentDoc = get(commentRef);
         const comment = select(commentDoc, 'data', 'body');
         const replyRefs = select(commentDoc, 'data', 'replies');

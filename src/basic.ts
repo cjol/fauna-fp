@@ -21,10 +21,12 @@ export const at = <T>(time: Arg<Timestamp>, x: Arg<T>) =>
 /**
  * Executes a user-defined function.
  */
-export const call = <I extends any[], O>(
-  fn: Arg<Ref<FaunaFunction<I, O>>>,
-  terms: ArgTuple<I>
-) => q.Call(fn, ...terms) as Query<QueryResult<O>>;
+export function call<I extends any[], O>(fn: Arg<Ref<FaunaFunction<I, O>>>): (...terms: ArgTuple<I>) => Query<QueryResult<O>>;
+export function call<I extends any[], O>(fn: Arg<Ref<FaunaFunction<I, O>>>, terms: ArgTuple<I>): Query<QueryResult<O>>;
+export function call<I extends any[], O>(fn: Arg<Ref<FaunaFunction<I, O>>>, terms?: ArgTuple<I>) {
+  if (terms) return q.Call(fn, ...terms);
+  return (...terms: ArgTuple<I>) => call(fn, terms);
+}
 
 /**
  * Executes expressions in order. Renamed from `q.Do`

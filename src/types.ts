@@ -2,15 +2,15 @@ import { A } from 'ts-toolbelt';
 import { Type } from './types.internal';
 
 // the most important datatype is a `Query` type which will represent the result of running an FQL query
-export interface Query<T = unknown> extends Type<'Query', { type: T }> {}
+export interface Query<T = unknown> extends Type<'Query', { type: T }> { }
 
 // it's useful to have a way to discharge Query types to retrieve their Result type
 export type QueryResult<T> = T extends Query<infer U>
   ? QueryResult<U>
   : T extends [...any[]] | Record<string, any>
   ? {
-      [Index in keyof T]: QueryResult<T[Index]>;
-    }
+    [Index in keyof T]: QueryResult<T[Index]>;
+  }
   : T extends Array<infer U>
   ? Array<QueryResult<U>>
   : T;
@@ -22,7 +22,7 @@ export type Arg<T = unknown> = [T] extends [never]
   ? Query<never>
   : T extends Query<infer U> // handle nested queries
   ? //   TODO: this isn't very elegant, but effectively I'm trying to block descent into our opaque types. Without this I had problem with `Refs` not resolving properly
-    Arg<U>
+  Arg<U>
   : T extends Ref<any> | Function
   ? QueryOrLiteral<T>
   : // handle arrays
@@ -31,16 +31,16 @@ export type Arg<T = unknown> = [T] extends [never]
   : // handle objects and tuples
   T extends [...any[]] | Record<string, any>
   ? QueryOrLiteral<
-      {
-        [Index in keyof T]: Arg<T[Index]>;
-      }
-    >
+    {
+      [Index in keyof T]: Arg<T[Index]>;
+    }
+  >
   : // handle booleans (else we end up with Query<false> | Query<true> for some reason which causes problems)
   // TODO: I'm not very happy with this because we lose precision on e.g. Arg<true>
   T extends boolean
   ? boolean | Query<boolean>
   : // handle others (mostly primitives)
-    QueryOrLiteral<T>;
+  QueryOrLiteral<T>;
 
 // Like an Arg, but spreadable (for functions that I think should take an array but FQL doesn't)
 export type ArgTuple<Tuple extends [...any[]]> = {
@@ -50,43 +50,43 @@ export type ArgTuple<Tuple extends [...any[]]> = {
 // map the remaining internal datatypes
 export interface Collection<T = unknown, D = unknown>
   extends Type<
-    'Collection',
-    {
-      type: T;
-      data: D;
-    }
-  > {}
+  'Collection',
+  {
+    type: T;
+    data: D;
+  }
+  > { }
 
-export interface Database<T = unknown> extends Type<'Database', { data: T }> {}
+export interface Database<T = unknown> extends Type<'Database', { data: T }> { }
 
 export interface Index<T = unknown, O extends Arg[] = []>
   extends Type<
-    'Index',
-    {
-      result: T;
-      params: O;
-    }
-  > {}
+  'Index',
+  {
+    result: T;
+    params: O;
+  }
+  > { }
 
-export interface Role extends Type<'Role'> {}
+export interface Role extends Type<'Role'> { }
 
 export interface Key<D = unknown>
   extends Type<
-    'Key',
-    {
-      data: D;
-    }
-  > {}
+  'Key',
+  {
+    data: D;
+  }
+  > { }
 
-export interface Token<D = unknown> extends Type<'Token', { data: D }> {}
-export interface Cursor extends Type<'Cursor'> {}
-export interface Timestamp extends Type<'Timestamp'> {}
-export interface Date extends Type<'Date'> {}
+export interface Token<D = unknown> extends Type<'Token', { data: D }> { }
+export interface Cursor extends Type<'Cursor'> { }
+export interface Timestamp extends Type<'Timestamp'> { }
+export interface Date extends Type<'Date'> { }
 export interface Ref<T = unknown> extends Type<'Ref', { type: T }> {
   id: string;
 }
 export interface FaunaFunction<I extends Arg[], O, D = unknown>
-  extends Type<'Function', { data: D; terms: I; result: O }> {}
+  extends Type<'Function', { data: D; terms: I; result: O }> { }
 
 export type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<T>>;
 
@@ -105,6 +105,11 @@ export interface Page<T> {
   after?: Cursor;
   before?: Cursor;
 }
+
+export type Iter<T> = Page<T> | Array<T>;
+
+export type MapIterable<C extends Iter<any>, O> = C extends Page<any> ? Page<O> : Array<O>;
+export type IterPayload<C extends Iter<any>> = C extends Iter<infer O> ? O : never
 
 export type Callback<T extends any[], R> = (
   ...x: { [K in keyof T]: Query<T[K]> }
@@ -129,8 +134,8 @@ export interface Privilege {
     write?: boolean | ((oldDoc: unknown, newDoc: unknown, ref: Ref) => boolean);
     history_read?: boolean | ((x: Ref) => boolean);
     history_write?:
-      | boolean
-      | ((ref: Ref, ts: Timestamp, action: string, newDoc: unknown) => boolean);
+    | boolean
+    | ((ref: Ref, ts: Timestamp, action: string, newDoc: unknown) => boolean);
     unrestricted_read?: boolean | ((terms: unknown[]) => boolean);
     call?: boolean | ((args: unknown[]) => boolean);
   };

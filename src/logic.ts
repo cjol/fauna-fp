@@ -27,8 +27,12 @@ export const containsValue = (value: Arg, obj: Arg) =>
 /**
  * Returns true of all values are equivalent.
  */
-export const equals = <O>(a: Arg<O>, b: Arg<O>) =>
-  q.Equals(a, b) as Query<boolean>;
+export function equals<O>(a: Arg<O>): (b: Arg<O>) => Query<boolean>;
+export function equals<O>(a: Arg<O>, b: Arg<O>): Query<boolean>;
+export function equals<O>(a: Arg<O>, b?: Arg<O>) {
+  if (b) return q.Equals(a, b);
+  return (b: Arg<O>) => equals(a, b);
+}
 
 /**
  * Returns true if a document has an event at a specific time.
