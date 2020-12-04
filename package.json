@@ -19,8 +19,10 @@
     "faunadb": "^3.0.1"
   },
   "dependencies": {
+    "@types/ramda": "^0.27.32",
     "faunadb": "^3.0.1",
-    "fn-annotate": "^1.2.0"
+    "fn-annotate": "^1.2.0",
+    "ramda": "^0.27.1"
   },
   "scripts": {
     "test": "jest --coverage",
