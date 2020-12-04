@@ -1,12 +1,17 @@
 import { query as q } from 'faunadb';
 import { expectTypeOf } from 'expect-type';
 import { Arg, Query } from './types';
-import { abort, at, call, doMany, iff, letVar } from './basic';
-import { equals } from './logic';
-import { fun } from './database';
-import { length } from './string';
-import { add } from './number';
-import { time } from './date';
+import { abort } from "./abort";
+import { iff } from "./iff";
+import { letVar } from "./letVar";
+import { doMany } from "./doMany";
+import { call } from "./call";
+import { at } from "./at";
+import { equals } from "./equals";
+import { fun } from "./fun";
+import { length } from "./length";
+import { add } from "./add";
+import { time } from "./time";
 import { pipe } from 'fp-ts/lib/function';
 
 describe('control flow', () => {

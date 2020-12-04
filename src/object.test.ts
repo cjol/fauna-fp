@@ -1,9 +1,12 @@
 import { query as q } from 'faunadb';
 import { expectTypeOf } from 'expect-type';
-import { merge, select, selectDefault, toArray } from './object';
+import { toArray } from "./toArray";
+import { merge } from "./merge";
+import { selectDefault } from "./selectDefault";
+import { select } from "./select";
 import { Arg, Query } from './types';
 import { pipe } from 'fp-ts/lib/function';
-import { or } from './logic';
+import { or } from "./or";
 
 describe('object', () => {
   test('select', () => {

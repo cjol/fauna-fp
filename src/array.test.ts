@@ -1,37 +1,35 @@
-import { query as q } from 'faunadb';
-import {
-  any,
-  append,
-  count,
-  difference,
-  distinct,
-  drop,
-  filter,
-  foreach,
-  intersection,
-  isEmpty,
-  isNonEmpty,
-  map,
-  max,
-  min,
-  prepend,
-  reduce,
-  reverse,
-  sum,
-  take,
-  toObject,
-  union,
-  all,
-  mean,
-} from './array';
-import { length } from './string';
 import { expectTypeOf } from 'expect-type';
-import { Arg, Page, Query } from './types';
+import { query as q } from 'faunadb';
 import { pipe } from 'fp-ts/function';
-import { equals } from './logic';
-import { add } from './number';
-import { fun } from './database';
-import { call } from './basic';
+import { all } from "./all";
+import { any } from "./any";
+import { append } from "./append";
+import { call } from "./call";
+import { count } from "./count";
+import { fun } from "./fun";
+import { difference } from "./difference";
+import { distinct } from "./distinct";
+import { drop } from "./drop";
+import { filter } from "./filter";
+import { foreach } from "./foreach";
+import { intersection } from "./intersection";
+import { isEmpty } from "./isEmpty";
+import { isNonEmpty } from "./isNonEmpty";
+import { equals } from "./equals";
+import { map } from "./map";
+import { max } from "./max";
+import { mean } from "./mean";
+import { min } from "./min";
+import { add } from "./add";
+import { prepend } from "./prepend";
+import { reduce } from "./reduce";
+import { reverse } from "./reverse";
+import { length } from "./length";
+import { sum } from "./sum";
+import { take } from "./take";
+import { toObject } from "./toObject";
+import { Arg, Page, Query } from './types';
+import { union } from "./union";
 
 describe('array', () => {
   const strArr = ['hello', 'world'];

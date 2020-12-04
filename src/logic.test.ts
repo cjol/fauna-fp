@@ -1,23 +1,22 @@
 import { query as q } from 'faunadb';
 import { expectTypeOf } from 'expect-type';
 import { Query } from './types';
-import {
-  and,
-  containsField,
-  containsPath,
-  containsValue,
-  equals,
-  exists,
-  gt,
-  gte,
-  lt,
-  lte,
-  not,
-  or,
-} from './logic';
+import { or } from "./or";
+import { not } from "./not";
+import { lte } from "./lte";
+import { lt } from "./lt";
+import { gte } from "./gte";
+import { gt } from "./gt";
+import { exists } from "./exists";
+import { equals } from "./equals";
+import { containsValue } from "./containsValue";
+import { containsPath } from "./containsPath";
+import { containsField } from "./containsField";
+import { and } from "./and";
 import { pipe, } from 'fp-ts/lib/function';
-import { add } from './number';
-import { collection, ref } from './database';
+import { add } from "./add";
+import { collection } from "./collection";
+import { ref } from "./ref";
 describe('control flow', () => {
   test('and', () => {
     const result = and(and(false, true, true), false);

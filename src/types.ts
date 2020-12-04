@@ -145,3 +145,5 @@ export interface Membership {
   resource: Ref;
   predicate?: (ref: Ref) => boolean;
 }
+
+export type Action = 'create' | 'delete' | 'update';

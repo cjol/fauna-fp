@@ -1,15 +1,21 @@
 import { ExprArg, query as q } from 'faunadb';
-import { map, mean, reduce } from './array';
-import { containsStrRegex, length } from './string';
+import { reduce } from "./reduce";
+import { mean } from "./mean";
+import { map } from "./map";
+import { length } from "./length";
+import { containsStrRegex } from "./containsStrRegex";
 import { expectTypeOf } from 'expect-type';
 import { Arg, Page, Query, Ref } from './types';
 import { flow, pipe } from 'fp-ts/function';
-import { abort, iff } from './basic';
-import { select } from './object';
-import { gte, equals } from './logic';
+import { abort } from "./abort";
+import { iff } from "./iff";
+import { select } from "./select";
+import { gte } from "./gte";
+import { equals } from "./equals";
 import { create, get, index, paginate, paginateOpts } from '.';
-import { collection, ref } from './database';
-import { match } from './set';
+import { collection } from "./collection";
+import { ref } from "./ref";
+import { match } from "./match";
 
 describe('misc', () => {
   const strArr = ['hello', 'world'];
