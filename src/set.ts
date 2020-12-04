@@ -1,4 +1,13 @@
-import { Arg, ArgTuple, Callback, Index, q, Query, Ref } from "./types";
+import {
+  Arg,
+  ArgTuple,
+  Callback,
+  Index,
+  Query,
+  QueryResult,
+  Ref,
+} from './types';
+import { q } from './types.internal';
 
 // TODO: be more precise about the difference between a Set and an Array
 
@@ -21,7 +30,7 @@ import { Arg, ArgTuple, Callback, Index, q, Query, Ref } from "./types";
 export const join = <O, T extends any[]>(
   detail: Arg<Index<O, T> | Callback<T, O>>,
   source: Arg<T[]>
-) => q.Join(source, detail) as Query<O[]>;
+) => q.Join(source, detail) as Query<QueryResult<O>[]>;
 
 /**
  * The `Match` function finds the "search terms" provided to `Match` in the
@@ -50,13 +59,14 @@ export const match = <T, I extends any[]>(
  * Returns a subset of a set, in the specified range.
  */
 export const range = <T>(start: Arg<T>, end: Arg<T>, set: Arg<T[]>) =>
-  q.Range(set, start, end) as Query<T[]>;
+  q.Range(set, start, end) as Query<QueryResult<T>[]>;
 
 // Reduce: defined in array
 // Reverse: defined in array
 
 // Singleton: TODO
-export const singleton = <T>(item: Arg<T>) => q.Singleton(item) as Query<T[]>;
+export const singleton = <T>(item: Arg<T>) =>
+  q.Singleton(item) as Query<QueryResult<T>[]>;
 
 // Sum: defined in array
 // Union: defined in array

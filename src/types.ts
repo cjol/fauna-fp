@@ -1,23 +1,97 @@
-import { query } from 'faunadb';
+import { A } from 'ts-toolbelt';
+import { Type } from './types.internal';
 
-// treat q as untyped because the builtin types aren't very helpful
-export const q = query as Record<keyof typeof query, any>;
+// the most important datatype is a `Query` type which will represent the result of running an FQL query
+export interface Query<T = unknown> extends Type<'Query', { type: T }> {}
 
-export type Collection<T = unknown, D = unknown> = {
-  __TYPE__: { name: 'FAUNA_COLLECTION'; type: T; data: D };
+// it's useful to have a way to discharge Query types to retrieve their Result type
+export type QueryResult<T> = T extends Query<infer U>
+  ? QueryResult<U>
+  : T extends [...any[]] | Record<string, any>
+  ? {
+      [Index in keyof T]: QueryResult<T[Index]>;
+    }
+  : T extends Array<infer U>
+  ? Array<QueryResult<U>>
+  : T;
+
+// most functions accept either a Query or an object literal, so it's convenient to have a way to represent that
+export type QueryOrLiteral<T = unknown> = Query<T> | T;
+
+export type Arg<T = unknown> = [T] extends [never]
+  ? Query<never>
+  : T extends Query<infer U> // handle nested queries
+  ? //   TODO: this isn't very elegant, but effectively I'm trying to block descent into our opaque types. Without this I had problem with `Refs` not resolving properly
+    Arg<U>
+  : T extends Ref<any> | Function
+  ? QueryOrLiteral<T>
+  : // handle arrays
+  T extends Array<infer U>
+  ? QueryOrLiteral<Array<Arg<U>>>
+  : // handle objects and tuples
+  T extends [...any[]] | Record<string, any>
+  ? QueryOrLiteral<
+      {
+        [Index in keyof T]: Arg<T[Index]>;
+      }
+    >
+  : // handle booleans (else we end up with Query<false> | Query<true> for some reason which causes problems)
+  // TODO: I'm not very happy with this because we lose precision on e.g. Arg<true>
+  T extends boolean
+  ? boolean | Query<boolean>
+  : // handle others (mostly primitives)
+    QueryOrLiteral<T>;
+
+// Like an Arg, but spreadable (for functions that I think should take an array but FQL doesn't)
+export type ArgTuple<Tuple extends [...any[]]> = {
+  [Index in keyof Tuple]: Arg<Tuple[Index]>;
 };
-export type Database<T = unknown> = { __TYPE__: 'FAUNA_DATABASE'; data: T };
 
-export type Index<T = unknown, O extends Arg[] = []> = {
-  __TYPE__: { name: 'FAUNA_INDEX'; result: T; params: O };
-};
+// map the remaining internal datatypes
+export interface Collection<T = unknown, D = unknown>
+  extends Type<
+    'Collection',
+    {
+      type: T;
+      data: D;
+    }
+  > {}
 
-export type Role = { __TYPE__: { name: 'FAUNA_ROLE' } };
+export interface Database<T = unknown> extends Type<'Database', { data: T }> {}
 
-export type Key<D = unknown> = {
-  __TYPE__: { name: 'FAUNA_KEY'; data: D };
-};
+export interface Index<T = unknown, O extends Arg[] = []>
+  extends Type<
+    'Index',
+    {
+      result: T;
+      params: O;
+    }
+  > {}
+
+export interface Role extends Type<'Role'> {}
+
+export interface Key<D = unknown>
+  extends Type<
+    'Key',
+    {
+      data: D;
+    }
+  > {}
+
+export interface Token<D = unknown> extends Type<'Token', { data: D }> {}
+export interface Cursor extends Type<'Cursor'> {}
+export interface Timestamp extends Type<'Timestamp'> {}
+export interface Date extends Type<'Date'> {}
+export interface Ref<T = unknown> extends Type<'Ref', { type: T }> {
+  id: string;
+}
+export interface FaunaFunction<I extends Arg[], O, D = unknown>
+  extends Type<'Function', { data: D; terms: I; result: O }> {}
+
 export type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<T>>;
+
+// finally, some useful data structures
+
 export type Credentials<I = unknown, D = unknown> = {
   ref: Ref<Credentials>;
   ts: number;
@@ -25,52 +99,7 @@ export type Credentials<I = unknown, D = unknown> = {
   instance: Ref<I>;
   data: D;
 };
-export type Token<D = unknown> = { __TYPE__: { name: 'FAUNA_TOKEN'; data: D } };
 
-export type Cursor = { __TYPE__: { name: 'FAUNA_CURSOR' } };
-export type Timestamp = { __TYPE__: { name: 'FAUNA_TIMESTAMP' } };
-export const time = (x: Arg<string>) => q.Time(x) as Query<Timestamp>;
-export type Date = { __TYPE__: { name: 'FAUNA_DATE' } };
-
-export type Ref<T = unknown> = {
-  id: string;
-  __TYPE__: { name: 'FAUNA_REF'; type: T };
-};
-export type FaunaFunction<I extends Arg[], O, D = unknown> = {
-  __TYPE__: { name: 'FAUNA_FUNCTION'; data: D; terms: I; result: O };
-};
-
-export interface Query<T = unknown> {
-  __TYPE__: { name: 'FAUNA_QUERY'; type: T };
-}
-
-type QueryOrLiteral<T> = T | Query<T>;
-
-export type Arg<T = unknown> = [T] extends [never]
-  ? Query<never>
-  : T extends boolean
-  ? boolean | Query<boolean>
-  : T extends Query<infer U>
-  ? Arg<U>
-  : T extends [...any[]]
-  ? QueryOrLiteral<
-      {
-        [Index in keyof T]: Arg<T[Index]>;
-      }
-    >
-  : T extends Array<infer U>
-  ? QueryOrLiteral<Array<Arg<U>>>
-  : // TODO: this isn't very elegant, but effectively I'm trying to block descent into our opaque types.
-  // We'll probably need to add more - or possibly I can use a single extends to catch 'em all.
-  T extends Ref<any> | Function
-  ? QueryOrLiteral<T>
-  : T extends Record<string, any>
-  ? Query<{ [K in keyof T]: T[K] }> | { [K in keyof T]: Arg<T[K]> }
-  : QueryOrLiteral<T>;
-
-export type ArgTuple<Tuple extends [...any[]]> = {
-  [Index in keyof Tuple]: Arg<Tuple[Index]>;
-};
 export interface Page<T> {
   data: T[];
   after?: Cursor;
@@ -86,10 +115,28 @@ export type Document<T> = {
   data: T;
 };
 
-/**
- * This is a bit of a hack for flattening queries
- * @param x Record containing queries
- */
-export function qAll<T extends object>(x: T) {
-  return x as Query<{ [K in keyof T]: T[K] extends Query<infer U> ? U : T[K] }>;
+export interface SourceObject<O> {
+  collection: Ref<Collection<O>> | '_';
+  fields: Record<string, (document: Document<O>) => Query<unknown>>;
+}
+
+export interface Privilege {
+  resource: Ref;
+  actions: {
+    create?: boolean | ((x: unknown) => boolean);
+    delete?: boolean | ((x: Ref) => boolean);
+    read?: boolean | ((x: Ref | unknown[]) => boolean);
+    write?: boolean | ((oldDoc: unknown, newDoc: unknown, ref: Ref) => boolean);
+    history_read?: boolean | ((x: Ref) => boolean);
+    history_write?:
+      | boolean
+      | ((ref: Ref, ts: Timestamp, action: string, newDoc: unknown) => boolean);
+    unrestricted_read?: boolean | ((terms: unknown[]) => boolean);
+    call?: boolean | ((args: unknown[]) => boolean);
+  };
+}
+
+export interface Membership {
+  resource: Ref;
+  predicate?: (ref: Ref) => boolean;
 }

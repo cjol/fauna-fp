@@ -1,3 +1,3 @@
-import { Arg, Query, q } from "./types";
+import { Arg, Query } from './types';
 
 // TODO: temporality functions

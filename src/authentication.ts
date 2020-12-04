@@ -2,17 +2,16 @@ import {
   Arg,
   Collection,
   Credentials,
-  Cursor,
   Database,
   Key,
-  Page,
-  q,
   Query,
+  QueryResult,
   Ref,
   Role,
   Timestamp,
   Token,
-} from "./types";
+} from './types';
+import { q } from './types.internal';
 
 /**
  * Create a key.
@@ -26,7 +25,7 @@ export const createKey = <D>(
   }>
 ) =>
   q.CreateKey(params) as Query<{
-    ref: Ref<Key<D>>;
+    ref: Ref<Key<QueryResult<D>>>;
     database: Ref<Database>;
     role: string;
     name?: string;
@@ -39,7 +38,7 @@ export const createKey = <D>(
  * Provides a reference to the internal credentials collection.
  */
 export const credentials = <I = unknown, D = unknown>() =>
-  q.Credentials() as Collection<Credentials<I, D>>;
+  q.Credentials() as Collection<Credentials<QueryResult<I>, QueryResult<D>>>;
 
 /**
  * Checks whether the current client has credentials.
@@ -56,30 +55,32 @@ export const identify = (doc: Arg<Ref<any>>, password: Arg<string>) =>
 /**
  * Fetches the identity’s auth token.
  */
-export const identity = <T = unknown>() => q.Identity() as Query<Ref<T>>;
+export const identity = <T = unknown>() =>
+  q.Identity() as Query<Ref<QueryResult<T>>>;
 
 // keyFromSecret defined in `read`
 
 /**
  * Retrieves the keys associated with the specified database.
  */
-export const keys = <D = unknown>() => q.Keys() as Collection<Key<D>>;
+export const keys = <D = unknown>() =>
+  q.Keys() as Collection<Key<QueryResult<D>>>;
 
 /**
  * Creates an auth token for an identity.
  */
 export const login = <D = unknown, T = unknown>(
-  identity: Arg<Ref<T>>,
+  identity: Arg<Ref<QueryResult<T>>>,
   params: Arg<{
     password: string;
-    data?: D;
+    data?: QueryResult<D>;
     ttl?: Timestamp;
   }>
 ) =>
   q.Login(identity, params) as Query<{
-    ref: Ref<Token<D>>;
+    ref: Ref<Token<QueryResult<D>>>;
     ts: number;
-    instance: Ref<T>;
+    instance: Ref<QueryResult<T>>;
     secret: string;
   }>;
 
@@ -92,4 +93,5 @@ export const logout = (all_tokens: Arg<boolean>) =>
 /**
  * Provides a reference to the internal tokens collection.
  */
-export const otkens = <D = unknown>() => q.Tokens() as Collection<Token<D>>;
+export const otkens = <D = unknown>() =>
+  q.Tokens() as Collection<Token<QueryResult<D>>>;

@@ -1,6 +1,6 @@
-import { Client } from "faunadb";
-import { Query } from "./types";
+import { Client } from 'faunadb';
+import { Query, QueryResult } from './types';
 
 export const query = <T>(client: Client, x: Query<T>) => {
-  return client.query<T>(x as any);
+  return client.query<QueryResult<T>>(x as any);
 };

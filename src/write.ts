@@ -2,7 +2,6 @@ import {
   Arg,
   Query,
   Document,
-  q,
   Ref,
   Timestamp,
   Collection,
@@ -10,7 +9,12 @@ import {
   Role,
   FaunaFunction,
   Key,
-} from "./types";
+  QueryResult,
+  SourceObject,
+  Membership,
+  Privilege,
+} from './types';
+import { q } from './types.internal';
 
 /**  Create a document in a collection. */
 export const create = <T = unknown>(
@@ -22,8 +26,8 @@ export const create = <T = unknown>(
   }>
 ) =>
   q.Create(collection, params) as Query<{
-    ref: Ref<T>;
-    data: T;
+    ref: Ref<QueryResult<T>>;
+    data: QueryResult<T>;
     ts: Timestamp;
   }>;
 
@@ -37,7 +41,7 @@ export const createCollection = <T = unknown, D = unknown>(
   }>
 ) =>
   q.CreateCollection(params) as Query<{
-    ref: Ref<Collection<T, D>>;
+    ref: Ref<Collection<T, QueryResult<D>>>;
     name: string;
     ts: Timestamp;
     history_days: number;
@@ -51,9 +55,9 @@ export const createDatabase = <T = unknown>(
   }>
 ) =>
   q.CreateDatabase(params) as Query<{
-    ref: Ref<Database<T>>;
+    ref: Ref<Database<QueryResult<T>>>;
     name: string;
-    data: T;
+    data: QueryResult<T>;
     ts: Timestamp;
     global_id: string;
   }>;
@@ -72,19 +76,13 @@ export const createFunction = <
   }>
 ) =>
   q.CreateFunction(params) as Query<{
-    ref: Ref<FaunaFunction<I, O, D>>;
+    ref: Ref<FaunaFunction<I, O, QueryResult<D>>>;
     name: string;
     role: string | Role;
     ts: Timestamp;
     // TODO: I don't yet have a runtime representation of Query objects
     body: unknown;
   }>;
-
-interface SourceObject<O> {
-  collection: Ref<Collection<O>> | "_";
-  fields: Record<string, (document: Document<O>) => Query<unknown>>;
-}
-
 /**  Create an index. */
 export const createIndex = <
   I extends unknown[] = unknown[],
@@ -104,7 +102,7 @@ export const createIndex = <
   }>
 ) =>
   q.CreateIndex(params) as Query<{
-    ref: Ref<FaunaFunction<I, O, D>>;
+    ref: Ref<FaunaFunction<I, O, QueryResult<D>>>;
     name: string;
     source: Ref<Collection<O>> | Array<SourceObject<O>>;
     active: boolean;
@@ -113,25 +111,6 @@ export const createIndex = <
   }>;
 
 // createKey defined in authentication
-interface Privilege {
-  resource: Ref;
-  actions: {
-    create?: boolean | ((x: unknown) => boolean);
-    delete?: boolean | ((x: Ref) => boolean);
-    read?: boolean | ((x: Ref | unknown[]) => boolean);
-    write?: boolean | ((oldDoc: unknown, newDoc: unknown, ref: Ref) => boolean);
-    history_read?: boolean | ((x: Ref) => boolean);
-    history_write?:
-      | boolean
-      | ((ref: Ref, ts: Timestamp, action: string, newDoc: unknown) => boolean);
-    unrestricted_read?: boolean | ((terms: unknown[]) => boolean);
-    call?: boolean | ((args: unknown[]) => boolean);
-  };
-}
-interface Membership {
-  resource: Ref;
-  predicate?: (ref: Ref) => boolean;
-}
 
 /** Create a user-defined role. */
 export const createRole = <T = unknown>(
@@ -143,7 +122,7 @@ export const createRole = <T = unknown>(
   }>
 ) =>
   q.CreateKey(params) as Query<{
-    ref: Ref<Key<T>>;
+    ref: Ref<Key<QueryResult<T>>>;
     ts: Timestamp;
     name: string;
     privileges: Array<Privilege>;
@@ -151,14 +130,14 @@ export const createRole = <T = unknown>(
   }>;
 
 /**Remove a document, key, index, collection, or database. */
-export const deleted = <T>(ref: Arg<Ref<T>>) =>
+export const deleteItem = <T>(ref: Arg<Ref<T>>) =>
   q.Delete(ref) as Query<{
-    ref: Ref<T>;
+    ref: Ref<QueryResult<T>>;
     ts: Timestamp;
-    data: T;
+    data: QueryResult<T>;
   }>;
 
-type Action = "create" | "delete" | "update";
+type Action = 'create' | 'delete' | 'update';
 /** Add an event to a document’s history. */
 export const insert = <T>(
   ref: Arg<Ref<T>>,
@@ -171,8 +150,8 @@ export const insert = <T>(
   q.Insert(ref, ts, action, param_object) as Query<{
     action: Action;
     ts: number;
-    document: Ref;
-    data: T;
+    document: Ref<QueryResult<T>>;
+    data: QueryResult<T>;
   }>;
 
 /** Remove an event from a document’s history. */
@@ -192,8 +171,8 @@ export const replace = <T>(
   }>
 ) =>
   q.Replace(ref, params) as Query<{
-    ref: Ref<T>;
-    data: T;
+    ref: Ref<QueryResult<T>>;
+    data: QueryResult<T>;
     ts: number;
   }>;
 
@@ -206,7 +185,7 @@ export const update = <T>(
   }>
 ) =>
   q.Replace(ref, params) as Query<{
-    ref: Ref<T>;
-    data: T;
+    ref: Ref<QueryResult<T>>;
+    data: QueryResult<T>;
     ts: number;
   }>;
