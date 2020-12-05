@@ -16,9 +16,14 @@ import { q } from "./types.internal";
  * needed, `Get` may be used to retrieve the document.
  */
 
-export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>): (...terms: ArgTuple<I>) => Query<Ref<Document<T>>>;
-export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>, terms: ArgTuple<I>): Query<Ref<Document<T>>>;
-export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>, terms?: ArgTuple<I>) {
+export function match<I extends unknown[], T>(
+  index: Arg<Ref<Index<I, T>>>
+): (...terms: ArgTuple<I>) => Query<Ref<Document<T>>>;
+export function match<I extends unknown[], T>(
+  index: Arg<Ref<Index<I, T>>>,
+  terms: ArgTuple<I>
+): Query<Ref<Document<T>>>;
+export function match<I extends unknown[], T>(index: Arg<Ref<Index<I, T>>>, terms?: ArgTuple<I>) {
   if (terms === undefined) return (terms: ArgTuple<I>) => match(index, terms);
   return q.Match(index, ...terms);
 }

@@ -1,4 +1,4 @@
-import { query as q } from "faunadb";
+import { Expr, query as q } from "faunadb";
 import { expectTypeOf } from "expect-type";
 import { toArray } from "./toArray";
 import { merge } from "./merge";
@@ -16,7 +16,9 @@ describe("object", () => {
     expect(intermediate).toEqual(intermediate2);
     const result = selectDefault(null, "zim")(intermediate);
     expectTypeOf(result).toEqualTypeOf<Query<boolean | null>>();
-    expect(result).toEqual(q.Select(["zim"], q.Select(["foo", "bar"], data), null as any));
+    expect(result).toEqual(
+      q.Select(["zim"], q.Select(["foo", "bar"], data), (null as unknown) as Expr)
+    );
   });
 
   test("merge", () => {
@@ -31,16 +33,20 @@ describe("object", () => {
     expect(data2).toEqual(data1);
     expect(data1).toEqual(q.Merge(one, two));
 
-    const withResolver1 = merge((key, aVal, bVal) => aVal, one, two);
-    const withResolver2 = merge((key, aVal, bVal) => aVal, one)(two);
-    const withResolver3 = merge((key, aVal, bVal) => aVal)(one)(two);
-    const withResolver4 = merge((key, aVal, bVal) => aVal)(one, two);
+    const withResolver1 = merge((key, aVal) => aVal, one, two);
+    const withResolver2 = merge((key, aVal) => aVal, one)(two);
+    const withResolver3 = merge((key, aVal) => aVal)(one)(two);
+    const withResolver4 = merge((key, aVal) => aVal)(one, two);
 
     expectTypeOf(withResolver1).toEqualTypeOf<Query<Merged>>();
     expectTypeOf(withResolver2).toEqualTypeOf<Query<Merged>>();
     expectTypeOf(withResolver3).toEqualTypeOf<Query<Merged>>();
     expectTypeOf(withResolver4).toEqualTypeOf<Query<Merged>>();
-    const fqlWithResolver = q.Merge({ foo: true }, { bar: false }, q.Lambda(["key", "aVal", "bVal"], q.Var("aVal")));
+    const fqlWithResolver = q.Merge(
+      { foo: true },
+      { bar: false },
+      q.Lambda(["key", "aVal"], q.Var("aVal"))
+    );
     expect(withResolver2).toEqual(fqlWithResolver);
     expect(withResolver3).toEqual(fqlWithResolver);
     expect(withResolver4).toEqual(fqlWithResolver);
@@ -50,9 +56,9 @@ describe("object", () => {
     const mergeOr = merge((x, a: Arg<boolean>, b: Arg<boolean>) => or(a, b));
     mergeOr({ foo: true }, { bar: false });
     mergeOr({ foo: true })({ bar: false });
-    //@ts-expect-error
+    //@ts-expect-error bar is not boolean
     mergeOr({ foo: true }, { bar: "false" });
-    //@ts-expect-error
+    //@ts-expect-error bar is not boolean
     mergeOr({ foo: true })({ bar: "false" });
   });
 

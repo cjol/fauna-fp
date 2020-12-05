@@ -16,11 +16,17 @@ import { q } from "./types.internal";
  * Combines the items in a set with set’s indexed values.
  */
 
-export function join<O, T extends any[]>(
+export function join<O, T extends unknown[]>(
   detail: Arg<Index<T, O> | Callback<T, O>>
 ): (source: Arg<T[]>) => Query<QueryResult<O>[]>;
-export function join<O, T extends any[]>(detail: Arg<Index<T, O> | Callback<T, O>>, source: Arg<T[]>): Query<QueryResult<O>[]>;
-export function join<O, T extends any[]>(detail: Arg<Index<T, O> | Callback<T, O>>, source?: Arg<T[]>) {
+export function join<O, T extends unknown[]>(
+  detail: Arg<Index<T, O> | Callback<T, O>>,
+  source: Arg<T[]>
+): Query<QueryResult<O>[]>;
+export function join<O, T extends unknown[]>(
+  detail: Arg<Index<T, O> | Callback<T, O>>,
+  source?: Arg<T[]>
+) {
   if (source === undefined) return (source: Arg<T[]>) => join(detail, source);
   return q.Join(source, detail);
 }

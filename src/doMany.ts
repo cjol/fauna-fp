@@ -6,6 +6,8 @@ import { q } from "./types.internal";
  * Executes expressions in order. Renamed from `q.Do`
  */
 
-export function doMany<I extends any[]>(...entries: ArgTuple<I>): Query<Tuple.Last<QueryResult<I>>> {
+export function doMany<I extends unknown[]>(
+  ...entries: ArgTuple<I>
+): Query<Tuple.Last<QueryResult<I>>> {
   return q.Do(...entries);
 }

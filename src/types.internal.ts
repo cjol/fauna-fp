@@ -1,8 +1,7 @@
 import { query } from "faunadb";
-import { A, T } from "ts-toolbelt";
 
-// treat q as untyped because the builtin types aren't very helpful
-export const q = query as Record<keyof typeof query, any>;
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const q = query as Record<keyof typeof query, Function>;
 
 /* 
  * TODO: ideally I would prefer not to export `id` and `internal` but atm
@@ -13,9 +12,9 @@ export const q = query as Record<keyof typeof query, any>;
 // create an opaque type to represent internal datatypes
 export declare const id: unique symbol;
 export declare const internal: unique symbol;
-export type Type<Id extends A.Key, A extends any = unknown> = {
+export type Type<Id extends string, A extends unknown = unknown> = {
   [id]: Id;
   [internal]: A;
 };
 
-export type CleanedType<T> = T extends Type<any> ? Omit<T, typeof id | typeof internal> : T;
+export type CleanedType<T> = T extends Type<never> ? Omit<T, typeof id | typeof internal> : T;

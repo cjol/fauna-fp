@@ -1,5 +1,5 @@
 import { expectTypeOf } from "expect-type";
-import { query as q } from "faunadb";
+import { Expr, query as q } from "faunadb";
 import { pipe } from "fp-ts/function";
 import { all } from "./all";
 import { any } from "./any";
@@ -42,7 +42,7 @@ describe("array", () => {
     const result = all(boolArr);
     expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
     expect(result).toEqual(q.All(boolArr));
-    // @ts-expect-error
+    // @ts-expect-error all expects a boolean array
     all(strArr), all(true);
   });
 
@@ -50,7 +50,7 @@ describe("array", () => {
     const result = any(boolArr);
     expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
     expect(result).toEqual(q.Any(boolArr));
-    // @ts-expect-error
+    // @ts-expect-error any expects a boolean array
     any(strArr), any(true);
   });
 
@@ -64,11 +64,11 @@ describe("array", () => {
     const fql = q.Append([1, 2, 3], numArr);
     expect(result).toEqual(fql);
     expect(resultC).toEqual(fql);
-    // @ts-expect-error
+    // @ts-expect-error arrays must be the same type
     append(numArr, strArr);
-    // @ts-expect-error
+    // @ts-expect-error arrays must be the same type
     append(numArr)(strArr);
-    // @ts-expect-error
+    // @ts-expect-error must pass arrays
     append(12, 4);
   });
 
@@ -76,7 +76,7 @@ describe("array", () => {
     const result = count(strArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Count(strArr));
-    // @ts-expect-error
+    // @ts-expect-error must pass an array
     pipe("hello", count);
   });
 
@@ -244,7 +244,7 @@ describe("array", () => {
     const result = max(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Max(numArr));
-    // @ts-expect-error
+    // @ts-expect-error must pass an array of numbers
     max(strArr);
   });
 
@@ -252,7 +252,7 @@ describe("array", () => {
     const result = min(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Min(numArr));
-    // @ts-expect-error
+    // @ts-expect-error must pass an array of numbers
     min(strArr);
   });
 
@@ -260,7 +260,7 @@ describe("array", () => {
     const result = sum(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Sum(numArr));
-    // @ts-expect-error
+    // @ts-expect-error must pass an array of numbers
     sum(strArr);
   });
 
@@ -279,25 +279,25 @@ describe("array", () => {
   test("reduce", () => {
     const result = reduce((x, y) => add([x, y]), 0 as number, numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr));
+    expect(result).toEqual(q.Reduce((curr: Expr, next: Expr) => q.Add(curr, next), 0, numArr));
   });
 
   test("reduce curried 1-2", () => {
     const result = reduce((x: Arg<number>, y: Arg<number>) => add([x, y]))(0, numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr));
+    expect(result).toEqual(q.Reduce((curr: Expr, next: Expr) => q.Add(curr, next), 0, numArr));
   });
 
   test("reduce curried 2-1", () => {
     const result = reduce((x: Arg<number>, y: Arg<number>) => add([x, y]), 0)(numPage);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numPage));
+    expect(result).toEqual(q.Reduce((curr: Expr, next: Expr) => q.Add(curr, next), 0, numPage));
   });
 
   test("reduce curried 1-1-1", () => {
     const result = reduce((x: Arg<number>, y: Arg<number>) => add([x, y]))(0)(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr));
+    expect(result).toEqual(q.Reduce((curr: Expr, next: Expr) => q.Add(curr, next), 0, numArr));
   });
 
   test("reverse", () => {

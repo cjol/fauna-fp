@@ -22,6 +22,9 @@ export function login<D = unknown, T = unknown>(
   identity: Arg<Ref<QueryResult<T>>>,
   params: Arg<LoginParams<D>>
 ): Query<LoginResult<D, T>>;
-export function login<D = unknown, T = unknown>(identity: Arg<Ref<QueryResult<T>>>, params?: Arg<LoginParams<D>>) {
+export function login<D = unknown, T = unknown>(
+  identity: Arg<Ref<QueryResult<T>>>,
+  params?: Arg<LoginParams<D>>
+) {
   return q.Login(identity, params);
 }

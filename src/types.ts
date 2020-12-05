@@ -1,13 +1,14 @@
-import { A } from "ts-toolbelt";
-import { CleanedType, Type } from "./types.internal";
+/* eslint-disable @typescript-eslint/ban-types */
+import { Type } from "./types.internal";
 
 // the most important datatype is a `Query` type which will represent the result of running an FQL query
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Query<T = unknown> extends Type<"Query", { type: T }> {}
 
 // it's useful to have a way to discharge Query types to retrieve their Result type
 export type QueryResult<T> = T extends Query<infer U>
   ? QueryResult<U>
-  : T extends [...any[]] | Record<string, any>
+  : T extends [...unknown[]] | Record<string, unknown>
   ? {
       [Index in keyof T]: QueryResult<T[Index]>;
     }
@@ -23,13 +24,13 @@ export type Arg<T = unknown> = [T] extends [never]
   : T extends Query<infer U> // handle nested queries
   ? //   TODO: this isn't very elegant, but effectively I'm trying to block descent into our opaque types. Without this I had problem with `Refs` not resolving properly
     Arg<U>
-  : T extends Ref<any> | Function
+  : T extends Ref<unknown> | Function
   ? QueryOrLiteral<T>
   : // handle arrays
   T extends Array<infer U>
   ? QueryOrLiteral<Array<Arg<U>>>
   : // handle objects and tuples
-  T extends [...any[]] | Record<string, any>
+  T extends [...unknown[]] | Record<string, unknown>
   ? QueryOrLiteral<
       {
         [Index in keyof T]: Arg<T[Index]>;
@@ -43,7 +44,7 @@ export type Arg<T = unknown> = [T] extends [never]
     QueryOrLiteral<T>;
 
 // Like an Arg, but spreadable (for functions that I think should take an array but FQL doesn't)
-export type ArgTuple<Tuple extends [...any[]]> = {
+export type ArgTuple<Tuple extends [...unknown[]]> = {
   [Index in keyof Tuple]: Arg<Tuple[Index]>;
 };
 
@@ -116,14 +117,15 @@ export interface Token<D = unknown> extends Type<"Token"> {
   instance: Ref;
   hashed_secret: string;
 }
-export interface Cursor extends Type<"Cursor"> {}
-export interface Timestamp extends Type<"Timestamp"> {}
-export interface Date extends Type<"Date"> {}
+export type Cursor = Type<"Cursor">;
+export type Timestamp = Type<"Timestamp">;
+export type Date = Type<"Date">;
 export type DocRef<T> = Ref<Document<T>>;
 export interface Ref<T = unknown> extends Type<"Ref", { type: T }> {
   id: string;
 }
-export interface FaunaFunction<I extends Arg[], O, D = unknown> extends Type<"Function", { terms: I; result: O }> {
+export interface FaunaFunction<I extends Arg[], O, D = unknown>
+  extends Type<"Function", { terms: I; result: O }> {
   ref: Ref<FaunaFunction<I, O, D>>;
   ts: number;
   name: string;
@@ -134,7 +136,7 @@ export interface FaunaFunction<I extends Arg[], O, D = unknown> extends Type<"Fu
 }
 
 // TODO: create a real "schema" type, and set Collection = Schema<Document>
-type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<any, T>>;
+// type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<unknown[], T>>;
 
 // finally, some useful data structures
 
@@ -152,12 +154,12 @@ export interface Page<T> {
   before?: Cursor;
 }
 
-export type Iter<T> = Page<T> | Array<T>;
+export type Iter<T = unknown> = Page<T> | Array<T>;
 
-export type MapIterable<C extends Iter<any>, O> = C extends Page<any> ? Page<O> : Array<O>;
-export type IterPayload<C extends Iter<any>> = C extends Iter<infer O> ? O : never;
+export type MapIterable<C extends Iter<unknown>, O> = C extends Page<unknown> ? Page<O> : Array<O>;
+export type IterPayload<C extends Iter> = C extends Iter<infer O> ? O : never;
 
-export type Callback<T extends any[], R> = (...x: { [K in keyof T]: Query<T[K]> }) => Arg<R>;
+export type Callback<T extends unknown[], R> = (...x: { [K in keyof T]: Query<T[K]> }) => Arg<R>;
 
 export type Document<T> = {
   ref: Ref<T>;
@@ -178,7 +180,9 @@ export interface Privilege {
     read?: boolean | ((x: Ref | unknown[]) => boolean);
     write?: boolean | ((oldDoc: unknown, newDoc: unknown, ref: Ref) => boolean);
     history_read?: boolean | ((x: Ref) => boolean);
-    history_write?: boolean | ((ref: Ref, ts: Timestamp, action: string, newDoc: unknown) => boolean);
+    history_write?:
+      | boolean
+      | ((ref: Ref, ts: Timestamp, action: string, newDoc: unknown) => boolean);
     unrestricted_read?: boolean | ((terms: unknown[]) => boolean);
     call?: boolean | ((args: unknown[]) => boolean);
   };

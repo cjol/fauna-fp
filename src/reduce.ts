@@ -6,8 +6,15 @@ export function reduce<T, A>(
   f: Callback<[A, T], A>
 ): ((init: Arg<A>, source: Arg<Iter<T>>) => Query<QueryResult<A>>) &
   ((init: Arg<A>) => (source: Arg<Iter<T>>) => Query<QueryResult<A>>);
-export function reduce<T, A>(f: Callback<[A, T], A>, init: Arg<A>): (source: Arg<Iter<T>>) => Query<QueryResult<A>>;
-export function reduce<T, A>(f: Callback<[A, T], A>, init: Arg<A>, source: Arg<Iter<T>>): Query<QueryResult<A>>;
+export function reduce<T, A>(
+  f: Callback<[A, T], A>,
+  init: Arg<A>
+): (source: Arg<Iter<T>>) => Query<QueryResult<A>>;
+export function reduce<T, A>(
+  f: Callback<[A, T], A>,
+  init: Arg<A>,
+  source: Arg<Iter<T>>
+): Query<QueryResult<A>>;
 export function reduce<T, A>(f: Callback<[A, T], A>, init?: Arg<A>, source?: Arg<Iter<T>>) {
   // manually create a callback so that fauna driver can parse the param name more easily
   if (init !== undefined) {

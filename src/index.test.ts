@@ -1,4 +1,4 @@
-import { ExprArg, query as q } from "faunadb";
+import { Expr, ExprArg, query as q } from "faunadb";
 import { reduce } from "./reduce";
 import { mean } from "./mean";
 import { map } from "./map";
@@ -12,7 +12,7 @@ import { iff } from "./iff";
 import { select } from "./select";
 import { gte } from "./gte";
 import { equals } from "./equals";
-import { create, get, index, paginate, paginateOpts } from ".";
+import { create, get, index, paginateOpts } from ".";
 import { collection } from "./collection";
 import { ref } from "./ref";
 import { match } from "./match";
@@ -54,7 +54,8 @@ describe("misc", () => {
           q.Select(
             ["arr", 0],
             q.Reduce(
-              (curr: any, next: any) => q.If(q.GTE(q.Select(["len"], curr), q.Select(["len"], next)), next, curr),
+              (curr: Expr, next: Expr) =>
+                q.If(q.GTE(q.Select(["len"], curr), q.Select(["len"], next)), next, curr),
               { len: 0, arr: [] as string[] },
               q.Map(data, (item) => ({
                 arr: item,
@@ -111,12 +112,21 @@ describe("misc", () => {
 
     expect(comments).toEqual(
       q.Map(
-        q.Paginate(q.Match(q.Index("tagged_comments_by_user"), q.Ref(q.Collection("users"), "123456789"), "untagged"), {
-          size: 10,
-        }),
+        q.Paginate(
+          q.Match(
+            q.Index("tagged_comments_by_user"),
+            q.Ref(q.Collection("users"), "123456789"),
+            "untagged"
+          ),
+          {
+            size: 10,
+          }
+        ),
         (item) => ({
           comment: q.Select(["data", "body"], q.Get(item)),
-          replies: q.Map(q.Select(["data", "replies"], q.Get(item)), (item) => q.Select(["data", "body"], q.Get(item))),
+          replies: q.Map(q.Select(["data", "replies"], q.Get(item)), (item) =>
+            q.Select(["data", "body"], q.Get(item))
+          ),
         })
       )
     );
@@ -131,22 +141,28 @@ describe("misc", () => {
     const emailValidator = (x: Arg<User>) => containsStrRegex("^.+@.+..+$", select(x, "email"));
     const passwordValidator = (x: Arg<User>) => gte([8, length(select(x, "password"))]);
 
-    const validate = <T>(f: (x: Arg<T>) => Query<boolean>) => (x: Arg<T>) => iff(f(x), x, abort("invalid data"));
+    const validate = <T>(f: (x: Arg<T>) => Query<boolean>) => (x: Arg<T>) =>
+      iff(f(x), x, abort("invalid data"));
 
     const usersCollection = collection<User>("users");
 
-    const register = flow(validate(emailValidator), validate(passwordValidator), (x) => create(usersCollection, { data: x }));
+    const register = flow(validate(emailValidator), validate(passwordValidator), (x) =>
+      create(usersCollection, { data: x })
+    );
 
     const newUser = register({ email: "", password: "" });
     const insertedEmail = select(newUser, "data", "email");
 
     expectTypeOf(insertedEmail).toEqualTypeOf<Query<string>>();
 
-    const Validator = (f: (x: ExprArg) => ExprArg) => (x: ExprArg) => q.If(f(x), x, q.Abort("invalid data"));
+    const Validator = (f: (x: ExprArg) => ExprArg) => (x: ExprArg) =>
+      q.If(f(x), x, q.Abort("invalid data"));
 
     const PasswordValidator = Validator((x) => q.GTE([8, q.Length(q.Select(["password"], x))]));
 
-    const EmailValidator = Validator((x) => q.ContainsStrRegex(q.Select(["email"], x), "^.+@.+..+$"));
+    const EmailValidator = Validator((x) =>
+      q.ContainsStrRegex(q.Select(["email"], x), "^.+@.+..+$")
+    );
 
     const Register = (x: User) =>
       q.Create(q.Collection("users"), {
@@ -159,7 +175,7 @@ describe("misc", () => {
 
     expect(insertedEmail).toEqual(Email);
 
-    // @ts-expect-error
+    // @ts-expect-error no email is provided
     register({ password: "" });
   });
 });

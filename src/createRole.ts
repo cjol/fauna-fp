@@ -1,4 +1,4 @@
-import { Arg, Query, Membership, Privilege, Role } from "./types";
+import { Arg, Query, Role } from "./types";
 import { q } from "./types.internal";
 
 /** Create a user-defined role. */

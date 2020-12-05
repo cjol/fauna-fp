@@ -7,7 +7,11 @@
   "author": "Christopher Little <christopher@littlehq.uk>",
   "license": "MIT",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
     "dotenv": "^8.2.0",
+    "eslint": "^7.15.0",
+    "eslint-plugin-unused-imports": "^1.0.1",
     "expect-type": "^0.8.0",
     "fp-ts": "^2.8.4",
     "jest": "^26.5.3",
@@ -20,6 +24,7 @@
   },
   "dependencies": {
     "@types/ramda": "^0.27.32",
+    "eslint-config-prettier": "^6.15.0",
     "faunadb": "^3.0.1",
     "fn-annotate": "^1.2.0",
     "ramda": "^0.27.1"

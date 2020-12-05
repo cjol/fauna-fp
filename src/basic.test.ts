@@ -64,7 +64,9 @@ describe("control flow", () => {
     const reversedHello = callReverse("hello");
     const result = pipe(reversedHello, callReverse);
     expectTypeOf(result).toEqualTypeOf<Query<string>>();
-    expect(result).toEqual(q.Call(q.Function("reverse_string"), q.Call(q.Function("reverse_string"), "hello")));
+    expect(result).toEqual(
+      q.Call(q.Function("reverse_string"), q.Call(q.Function("reverse_string"), "hello"))
+    );
   });
 
   test("doMany", () => {
@@ -74,11 +76,17 @@ describe("control flow", () => {
   });
 
   test("letVar", () => {
-    const getLengthPlusTwo = (x: Arg<string>) => letVar(length(x), (len) => letVar(2, (constant) => add([constant, len])));
+    const getLengthPlusTwo = (x: Arg<string>) =>
+      letVar(length(x), (len) => letVar(2, (constant) => add([constant, len])));
 
     const result = getLengthPlusTwo("hello");
 
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(q.Let({ len: q.Length("hello") }, q.Let({ constant: 2 }, q.Add(q.Var("constant"), q.Var("len")))));
+    expect(result).toEqual(
+      q.Let(
+        { len: q.Length("hello") },
+        q.Let({ constant: 2 }, q.Add(q.Var("constant"), q.Var("len")))
+      )
+    );
   });
 });

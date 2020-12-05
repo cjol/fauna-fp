@@ -1,11 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
 import { curry } from "ramda";
 import { Arg, Query, Callback, QueryResult } from "./types";
 import { q } from "./types.internal";
 
 type NotAFunction = { [k: string]: unknown } & ({ bind?: never } | { call?: never });
 
-export function merge<A extends NotAFunction, B extends object>(a: Arg<A>, b: Arg<B>): Query<QueryResult<A> & QueryResult<B>>;
-export function merge<A extends NotAFunction>(a: Arg<A>): <B extends object>(b: Arg<B>) => Query<QueryResult<A> & QueryResult<B>>;
+export function merge<A extends NotAFunction, B extends object>(
+  a: Arg<A>,
+  b: Arg<B>
+): Query<QueryResult<A> & QueryResult<B>>;
+export function merge<A extends NotAFunction>(
+  a: Arg<A>
+): <B extends object>(b: Arg<B>) => Query<QueryResult<A> & QueryResult<B>>;
 export function merge<A extends object, B extends object>(
   resolver: Callback<[string, unknown, unknown], unknown>,
   a: Arg<A>,
@@ -24,6 +31,7 @@ export function merge<AVal, BVal>(
     a: Arg<A>,
     b: Arg<B>
   ) => Query<QueryResult<A> & QueryResult<B>>);
+// TODO: make this more type-precise
 export function merge(param1: any, param2?: any, param3?: any) {
   if (typeof param1 === "function") {
     const resolver = param1;

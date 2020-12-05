@@ -1,12 +1,11 @@
-import { Arg, Ref, QueryResult, Query, Document, Role, FaunaFunction, Index } from "./types";
+import { Arg, Ref, Query, Document, Collection } from "./types";
 import { q } from "./types.internal";
 
-/** Revise specific fields within a document. */
-type Fields<T> = T extends Role | FaunaFunction<any, any> | Index<any, any> ? T : Document<T>;
+// TODO: We should handle other types of schemas too
+type Fields<T> = T extends Collection<infer U> ? Document<U> : T;
 type UpdateParams<T> = Partial<Omit<Fields<T>, "ref" | "ts">>;
 
-let d: UpdateParams<Index<[string], string>> = {};
-
+/** Revise specific fields within a document. */
 export function update<T>(ref: Arg<Ref<T>>): (params: Arg<UpdateParams<T>>) => Query<Fields<T>>;
 export function update<T>(ref: Arg<Ref<T>>, params: Arg<UpdateParams<T>>): Query<Fields<T>>;
 export function update<T>(ref: Arg<Ref<T>>, params?: Arg<UpdateParams<T>>) {

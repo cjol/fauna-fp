@@ -7,6 +7,8 @@ import { q } from "./types.internal";
  * returned index reference belongs to the current database.
  */
 
-export function index<Terms extends Arg<unknown>[] = [], O = unknown>(name: string): Query<Ref<Index<Terms, O>>> {
+export function index<Terms extends Arg<unknown>[] = [], O = unknown>(
+  name: string
+): Query<Ref<Index<Terms, O>>> {
   return q.Index(name);
 }
