@@ -1,6 +1,6 @@
-import { expectTypeOf } from 'expect-type';
-import { query as q } from 'faunadb';
-import { pipe } from 'fp-ts/function';
+import { expectTypeOf } from "expect-type";
+import { query as q } from "faunadb";
+import { pipe } from "fp-ts/function";
 import { all } from "./all";
 import { any } from "./any";
 import { append } from "./append";
@@ -28,17 +28,17 @@ import { length } from "./length";
 import { sum } from "./sum";
 import { take } from "./take";
 import { toObject } from "./toObject";
-import { Arg, Page, Query } from './types';
+import { Arg, Page, Query } from "./types";
 import { union } from "./union";
 
-describe('array', () => {
-  const strArr = ['hello', 'world'];
+describe("array", () => {
+  const strArr = ["hello", "world"];
   const boolArr = [true, true, false];
   const numArr = [42, 43, 45];
-  const numPage = { data: numArr }
-  const strPage: Page<string> = { data: ['one', 'two'] }
+  const numPage = { data: numArr };
+  const strPage: Page<string> = { data: ["one", "two"] };
 
-  test('all', () => {
+  test("all", () => {
     const result = all(boolArr);
     expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
     expect(result).toEqual(q.All(boolArr));
@@ -46,7 +46,7 @@ describe('array', () => {
     all(strArr), all(true);
   });
 
-  test('any', () => {
+  test("any", () => {
     const result = any(boolArr);
     expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
     expect(result).toEqual(q.Any(boolArr));
@@ -54,7 +54,7 @@ describe('array', () => {
     any(strArr), any(true);
   });
 
-  test('append', () => {
+  test("append", () => {
     const result = append([1, 2, 3], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
 
@@ -72,143 +72,149 @@ describe('array', () => {
     append(12, 4);
   });
 
-  test('count', () => {
+  test("count", () => {
     const result = count(strArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Count(strArr));
     // @ts-expect-error
-    pipe('hello', count);
+    pipe("hello", count);
   });
 
-  test('difference', () => {
-    const result = difference([[1, 2, 3], [4, 5, 6]], numArr);
-    const resultC = difference([[1, 2, 3], [4, 5, 6]])(numArr);
+  test("difference", () => {
+    const result = difference(
+      [
+        [1, 2, 3],
+        [4, 5, 6],
+      ],
+      numArr
+    );
+    const resultC = difference([
+      [1, 2, 3],
+      [4, 5, 6],
+    ])(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expectTypeOf(resultC).toEqualTypeOf<Query<number[]>>();
-    const fql = q.Difference(numArr, [1, 2, 3], [4, 5, 6])
+    const fql = q.Difference(numArr, [1, 2, 3], [4, 5, 6]);
     expect(result).toEqual(fql);
     expect(resultC).toEqual(fql);
   });
 
-  test('distinct', () => {
+  test("distinct", () => {
     const result = distinct(strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Distinct(strArr));
   });
 
-  test('drop', () => {
+  test("drop", () => {
     const result = drop(5, strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Drop(5, strArr));
   });
 
-  test('drop curried page', () => {
+  test("drop curried page", () => {
     const result = drop(5)(strPage);
     expectTypeOf(result).toEqualTypeOf<Query<Page<string>>>();
     expect(result).toEqual(q.Drop(5, strPage));
   });
 
-  test('take', () => {
+  test("take", () => {
     const result = take(5, strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Take(5, strArr));
   });
 
-  test('take curried page', () => {
+  test("take curried page", () => {
     const result = take(5)(strPage);
     expectTypeOf(result).toEqualTypeOf<Query<Page<string>>>();
     expect(result).toEqual(q.Take(5, strPage));
   });
 
-  test('toObject', () => {
+  test("toObject", () => {
     const data: [string, string][] = [
-      ['foo', 'bar'],
-      ['fop', 'bap'],
+      ["foo", "bar"],
+      ["fop", "bap"],
     ];
     const result = toObject(data);
     expectTypeOf(result).toEqualTypeOf<Query<Record<string, string>>>();
     expect(result).toEqual(q.ToObject(data));
   });
 
-  test('filter', () => {
-    const result = filter((b: Arg<string>) => equals('hello', b), strArr);
+  test("filter", () => {
+    const result = filter((b: Arg<string>) => equals("hello", b), strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
-    expect(result).toEqual(q.Filter(strArr, (item) => q.Equals('hello', item)));
+    expect(result).toEqual(q.Filter(strArr, (item) => q.Equals("hello", item)));
   });
 
-  test('filter page', () => {
-    const result = filter((b: Arg<string>) => equals('hello', b), strPage);
+  test("filter page", () => {
+    const result = filter((b: Arg<string>) => equals("hello", b), strPage);
     expectTypeOf(result).toEqualTypeOf<Query<Page<string>>>();
-    expect(result).toEqual(q.Filter(strPage, (item) => q.Equals('hello', item)));
+    expect(result).toEqual(q.Filter(strPage, (item) => q.Equals("hello", item)));
   });
 
-  test('filter curried', () => {
-    const result = pipe(strArr, filter(equals('hello' as string)));
+  test("filter curried", () => {
+    const result = pipe(strArr, filter(equals("hello" as string)));
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
-    expect(result).toEqual(q.Filter(strArr, (item) => q.Equals('hello', item)));
+    expect(result).toEqual(q.Filter(strArr, (item) => q.Equals("hello", item)));
   });
 
-  test('filter curried page', () => {
-    const result = pipe(strPage, filter(equals('hello' as string)));
+  test("filter curried page", () => {
+    const result = pipe(strPage, filter(equals("hello" as string)));
     expectTypeOf(result).toEqualTypeOf<Query<Page<string>>>();
-    expect(result).toEqual(q.Filter(strPage, (item) => q.Equals('hello', item)));
+    expect(result).toEqual(q.Filter(strPage, (item) => q.Equals("hello", item)));
   });
 
-  test('filter call', () => {
-    const f = fun<[string], boolean>('foo')
-    const filtered = pipe(
-      strArr,
-      filter(call(f))
-    )
+  test("filter call", () => {
+    const f = fun<[string], boolean>("foo");
+    const filtered = pipe(strArr, filter(call(f)));
     expectTypeOf(filtered).toEqualTypeOf<Query<string[]>>();
-    const fql = q.Filter(strArr, (item) => q.Call(q.Function('foo'), item));
+    const fql = q.Filter(strArr, (item) => q.Call(q.Function("foo"), item));
     expect(filtered).toEqual(fql);
-  })
+  });
 
-  test('foreach', () => {
+  test("foreach", () => {
     const result = foreach(length, strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Foreach(strArr, (item) => q.Length(item)));
   });
 
-  test('foreach curried', () => {
+  test("foreach curried", () => {
     const result = foreach(length)(strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Foreach(strArr, (item) => q.Length(item)));
   });
 
-  test('intersection', () => {
+  test("intersection", () => {
     const result = intersection([1, 2, 3], [4, 5, 6], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Intersection([1, 2, 3], [4, 5, 6], numArr));
   });
 
-  test('union', () => {
+  test("union", () => {
     const result = union([1, 2, 3], [4, 5, 6], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Union([1, 2, 3], [4, 5, 6], numArr));
   });
 
-  test('isEmpty', () => {
+  test("isEmpty", () => {
     const result = isEmpty(boolArr);
     expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
     expect(result).toEqual(q.IsEmpty(boolArr));
   });
 
-  test('isNonEmpty', () => {
+  test("isNonEmpty", () => {
     const result = isNonEmpty(boolArr);
     expectTypeOf(result).toEqualTypeOf<Query<boolean>>();
     expect(result).toEqual(q.IsNonEmpty(boolArr));
   });
 
-  test('map', () => {
+  test("map", () => {
     const data = strArr;
     const result = map(length, data);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Map(data, (item) => q.Length(item)));
   });
 
-  test('map curried (open iterator)', () => {
+  test("map curried (open iterator)", () => {
     const data = strArr;
     const mapLength = map(length);
     const result = mapLength(data);
@@ -216,22 +222,25 @@ describe('array', () => {
     expect(result).toEqual(q.Map(data, (item) => q.Length(item)));
   });
 
-  test('map curried (fixed iterator)', () => {
+  test("map curried (fixed iterator)", () => {
     const data = strArr;
-    const result = pipe(data, map(x => length(x)), mean);
+    const result = pipe(
+      data,
+      map((x) => length(x)),
+      mean
+    );
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Mean(q.Map(data, (item) => q.Length(item))));
   });
 
-
-  test('map page', () => {
+  test("map page", () => {
     const data = strPage;
     const result = map(length, data);
     expectTypeOf(result).toEqualTypeOf<Query<Page<number>>>();
     expect(result).toEqual(q.Map(data, (item) => q.Length(item)));
   });
 
-  test('max', () => {
+  test("max", () => {
     const result = max(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Max(numArr));
@@ -239,7 +248,7 @@ describe('array', () => {
     max(strArr);
   });
 
-  test('min', () => {
+  test("min", () => {
     const result = min(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Min(numArr));
@@ -247,7 +256,7 @@ describe('array', () => {
     min(strArr);
   });
 
-  test('sum', () => {
+  test("sum", () => {
     const result = sum(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
     expect(result).toEqual(q.Sum(numArr));
@@ -255,58 +264,49 @@ describe('array', () => {
     sum(strArr);
   });
 
-  test('prepend', () => {
+  test("prepend", () => {
     const result = prepend([1, 2, 3], numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Prepend([1, 2, 3], numArr));
   });
 
-  test('prepend curried', () => {
+  test("prepend curried", () => {
     const result = prepend([1, 2, 3])(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number[]>>();
     expect(result).toEqual(q.Prepend([1, 2, 3], numArr));
   });
 
-
-  test('reduce', () => {
+  test("reduce", () => {
     const result = reduce((x, y) => add([x, y]), 0 as number, numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(
-      q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr)
-    );
+    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr));
   });
 
-  test('reduce curried 1-2', () => {
+  test("reduce curried 1-2", () => {
     const result = reduce((x: Arg<number>, y: Arg<number>) => add([x, y]))(0, numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(
-      q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr)
-    );
+    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr));
   });
 
-  test('reduce curried 2-1', () => {
+  test("reduce curried 2-1", () => {
     const result = reduce((x: Arg<number>, y: Arg<number>) => add([x, y]), 0)(numPage);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(
-      q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numPage)
-    );
+    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numPage));
   });
 
-  test('reduce curried 1-1-1', () => {
+  test("reduce curried 1-1-1", () => {
     const result = reduce((x: Arg<number>, y: Arg<number>) => add([x, y]))(0)(numArr);
     expectTypeOf(result).toEqualTypeOf<Query<number>>();
-    expect(result).toEqual(
-      q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr)
-    );
+    expect(result).toEqual(q.Reduce((curr: any, next: any) => q.Add(curr, next), 0, numArr));
   });
 
-  test('reverse', () => {
+  test("reverse", () => {
     const result = reverse(strArr);
     expectTypeOf(result).toEqualTypeOf<Query<string[]>>();
     expect(result).toEqual(q.Reverse(strArr));
   });
 
-  test('reverse page', () => {
+  test("reverse page", () => {
     const result = reverse(strPage);
     expectTypeOf(result).toEqualTypeOf<Query<Page<string>>>();
     expect(result).toEqual(q.Reverse(strPage));

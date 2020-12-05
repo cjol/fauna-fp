@@ -1,5 +1,5 @@
-import { query } from 'faunadb';
-import { A } from 'ts-toolbelt';
+import { query } from "faunadb";
+import { A } from "ts-toolbelt";
 
 // treat q as untyped because the builtin types aren't very helpful
 export const q = query as Record<keyof typeof query, any>;

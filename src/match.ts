@@ -1,12 +1,5 @@
-import {
-    Arg,
-    ArgTuple,
-    Index,
-    Query,
-
-    Ref
-} from './types';
-import { q } from './types.internal';
+import { Arg, ArgTuple, Index, Query, Ref } from "./types";
+import { q } from "./types.internal";
 
 /**
  * The `Match` function finds the "search terms" provided to `Match` in the
@@ -26,7 +19,6 @@ import { q } from './types.internal';
 export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>): (terms: ArgTuple<I>) => Query<T>;
 export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>, terms: ArgTuple<I>): Query<T>;
 export function match<I extends any[], T>(index: Arg<Ref<Index<I, T>>>, terms?: ArgTuple<I>) {
-    if (terms === undefined)
-        return (terms: ArgTuple<I>) => match(index, terms);
-    return q.Match(index, ...terms);
+  if (terms === undefined) return (terms: ArgTuple<I>) => match(index, terms);
+  return q.Match(index, ...terms);
 }

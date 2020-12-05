@@ -1,51 +1,50 @@
-import { ExprArg, query as q } from 'faunadb';
+import { ExprArg, query as q } from "faunadb";
 import { reduce } from "./reduce";
 import { mean } from "./mean";
 import { map } from "./map";
 import { length } from "./length";
 import { containsStrRegex } from "./containsStrRegex";
-import { expectTypeOf } from 'expect-type';
-import { Arg, Page, Query, Ref } from './types';
-import { flow, pipe } from 'fp-ts/function';
+import { expectTypeOf } from "expect-type";
+import { Arg, Page, Query, Ref } from "./types";
+import { flow, pipe } from "fp-ts/function";
 import { abort } from "./abort";
 import { iff } from "./iff";
 import { select } from "./select";
 import { gte } from "./gte";
 import { equals } from "./equals";
-import { create, get, index, paginate, paginateOpts } from '.';
+import { create, get, index, paginate, paginateOpts } from ".";
 import { collection } from "./collection";
 import { ref } from "./ref";
 import { match } from "./match";
 
-describe('misc', () => {
-  const strArr = ['hello', 'world'];
+describe("misc", () => {
+  const strArr = ["hello", "world"];
   const boolArr = [true, true, false];
   const numArr = [42, 43, 45];
 
   // convoluted example: find the array with the longest average string length, and return the first string.
   // If it's 'HELLO' then return one thing, else return another (note different types are preserved)
-  test('max avg string length', () => {
+  test("max avg string length", () => {
     const data: Page<string[]> = { data: [strArr, strArr] };
     const items = pipe(
       data,
-      map(
-        (x) => ({
-          len: pipe(x, map(length), mean),
-          arr: x,
-        }),
-      ));
+      map((x) => ({
+        len: pipe(x, map(length), mean),
+        arr: x,
+      }))
+    );
     const greatest = reduce(
       (curr, next) => {
-        const currLen = select(curr, 'len');
-        const nextLen = select(next, 'len');
+        const currLen = select(curr, "len");
+        const nextLen = select(next, "len");
         const myBool = gte([currLen, nextLen]);
         return iff(myBool, next, curr);
       },
       { len: 0, arr: [] as string[] },
       items
     );
-    const first = select(greatest, 'arr', 0);
-    const result = iff(equals(first, 'HELLO'), boolArr, numArr);
+    const first = select(greatest, "arr", 0);
+    const result = iff(equals(first, "HELLO"), boolArr, numArr);
 
     expectTypeOf(result).toEqualTypeOf<Query<Array<number> | Array<boolean>>>();
 
@@ -53,14 +52,9 @@ describe('misc', () => {
       q.If(
         q.Equals(
           q.Select(
-            ['arr', 0],
+            ["arr", 0],
             q.Reduce(
-              (curr: any, next: any) =>
-                q.If(
-                  q.GTE(q.Select(['len'], curr), q.Select(['len'], next)),
-                  next,
-                  curr
-                ),
+              (curr: any, next: any) => q.If(q.GTE(q.Select(["len"], curr), q.Select(["len"], next)), next, curr),
               { len: 0, arr: [] as string[] },
               q.Map(data, (item) => ({
                 arr: item,
@@ -68,7 +62,7 @@ describe('misc', () => {
               }))
             )
           ),
-          'HELLO'
+          "HELLO"
         ),
         boolArr,
         numArr
@@ -76,7 +70,7 @@ describe('misc', () => {
     );
   });
 
-  test('user comments', () => {
+  test("user comments", () => {
     interface User {
       name: string;
       email: string;
@@ -87,10 +81,8 @@ describe('misc', () => {
       replies: Array<Ref<Comment>>;
     }
 
-    const usersCollection = collection<User>('users');
-    const commentsByUser = index<[Ref<User>, string], Ref<Comment>>(
-      'tagged_comments_by_user'
-    );
+    const usersCollection = collection<User>("users");
+    const commentsByUser = index<[Ref<User>, string], Ref<Comment>>("tagged_comments_by_user");
     const getUserComments = (id: string, tag: string) => {
       const userRef = ref(usersCollection, id);
       const m = match(commentsByUser, [userRef, tag]);
@@ -98,19 +90,16 @@ describe('misc', () => {
 
       return map((commentRef) => {
         const commentDoc = get(commentRef);
-        const comment = select(commentDoc, 'data', 'body');
-        const replyRefs = select(commentDoc, 'data', 'replies');
+        const comment = select(commentDoc, "data", "body");
+        const replyRefs = select(commentDoc, "data", "replies");
         return {
           comment,
-          replies: map(
-            (reply) => select(get(reply), 'data', 'body'),
-            replyRefs
-          ),
+          replies: map((reply) => select(get(reply), "data", "body"), replyRefs),
         };
       }, commentsPage);
     };
 
-    const comments = getUserComments('123456789', 'untagged');
+    const comments = getUserComments("123456789", "untagged");
     expectTypeOf(comments).toEqualTypeOf<
       Query<
         Page<{
@@ -122,74 +111,55 @@ describe('misc', () => {
 
     expect(comments).toEqual(
       q.Map(
-        q.Paginate(
-          q.Match(
-            q.Index('tagged_comments_by_user'),
-            q.Ref(q.Collection('users'), '123456789'),
-            'untagged'
-          ),
-          { size: 10 }
-        ),
+        q.Paginate(q.Match(q.Index("tagged_comments_by_user"), q.Ref(q.Collection("users"), "123456789"), "untagged"), {
+          size: 10,
+        }),
         (item) => ({
-          comment: q.Select(['data', 'body'], q.Get(item)),
-          replies: q.Map(q.Select(['data', 'replies'], q.Get(item)), (item) =>
-            q.Select(['data', 'body'], q.Get(item))
-          ),
+          comment: q.Select(["data", "body"], q.Get(item)),
+          replies: q.Map(q.Select(["data", "replies"], q.Get(item)), (item) => q.Select(["data", "body"], q.Get(item))),
         })
       )
     );
   });
 
-  test('user registration', () => {
+  test("user registration", () => {
     interface User {
       email: string;
       password: string;
     }
 
-    const emailValidator = (x: Arg<User>) =>
-      containsStrRegex('^.+@.+..+$', select(x, 'email'));
-    const passwordValidator = (x: Arg<User>) =>
-      gte([8, length(select(x, 'password'))]);
+    const emailValidator = (x: Arg<User>) => containsStrRegex("^.+@.+..+$", select(x, "email"));
+    const passwordValidator = (x: Arg<User>) => gte([8, length(select(x, "password"))]);
 
-    const validate = <T>(f: (x: Arg<T>) => Query<boolean>) => (x: Arg<T>) =>
-      iff(f(x), x, abort('invalid data'));
+    const validate = <T>(f: (x: Arg<T>) => Query<boolean>) => (x: Arg<T>) => iff(f(x), x, abort("invalid data"));
 
-    const usersCollection = collection<User>('users');
+    const usersCollection = collection<User>("users");
 
-    const register = flow(
-      validate(emailValidator),
-      validate(passwordValidator),
-      (x) => create(usersCollection, { data: x })
-    );
+    const register = flow(validate(emailValidator), validate(passwordValidator), (x) => create(usersCollection, { data: x }));
 
-    const newUser = register({ email: '', password: '' });
-    const insertedEmail = select(newUser, 'data', 'email');
+    const newUser = register({ email: "", password: "" });
+    const insertedEmail = select(newUser, "data", "email");
 
     expectTypeOf(insertedEmail).toEqualTypeOf<Query<string>>();
 
-    const Validator = (f: (x: ExprArg) => ExprArg) => (x: ExprArg) =>
-      q.If(f(x), x, q.Abort('invalid data'));
+    const Validator = (f: (x: ExprArg) => ExprArg) => (x: ExprArg) => q.If(f(x), x, q.Abort("invalid data"));
 
-    const PasswordValidator = Validator((x) =>
-      q.GTE([8, q.Length(q.Select(['password'], x))])
-    );
+    const PasswordValidator = Validator((x) => q.GTE([8, q.Length(q.Select(["password"], x))]));
 
-    const EmailValidator = Validator((x) =>
-      q.ContainsStrRegex(q.Select(['email'], x), '^.+@.+..+$')
-    );
+    const EmailValidator = Validator((x) => q.ContainsStrRegex(q.Select(["email"], x), "^.+@.+..+$"));
 
     const Register = (x: User) =>
-      q.Create(q.Collection('users'), {
+      q.Create(q.Collection("users"), {
         data: PasswordValidator(EmailValidator(x)),
       });
 
-    const NewUser = Register({ email: '', password: '' });
+    const NewUser = Register({ email: "", password: "" });
 
-    const Email = q.Select(['data', 'email'], NewUser);
+    const Email = q.Select(["data", "email"], NewUser);
 
     expect(insertedEmail).toEqual(Email);
 
     // @ts-expect-error
-    register({ password: '' });
+    register({ password: "" });
   });
 });

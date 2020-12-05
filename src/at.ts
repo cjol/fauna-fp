@@ -1,14 +1,5 @@
-import {
-    Arg,
-
-
-
-    Query,
-    QueryResult,
-
-    Timestamp
-} from './types';
-import { q } from './types.internal';
+import { Arg, Query, QueryResult, Timestamp } from "./types";
+import { q } from "./types.internal";
 
 /**
  * Retrieves documents at or before a timestamp.
@@ -28,7 +19,6 @@ import { q } from './types.internal';
 export function at(timestamp: Arg<Timestamp>): <T>(expression: Arg<T>) => Query<QueryResult<T>>;
 export function at<T>(timestamp: Arg<Timestamp>, expression: Arg<T>): Query<QueryResult<T>>;
 export function at<T>(timestamp: Arg<Timestamp>, expression?: Arg<T>) {
-    if (expression === undefined)
-        return (expression: Arg<T>) => at(timestamp, expression);
-    return q.At(timestamp, expression);
+  if (expression === undefined) return (expression: Arg<T>) => at(timestamp, expression);
+  return q.At(timestamp, expression);
 }

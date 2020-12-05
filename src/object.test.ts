@@ -1,27 +1,25 @@
-import { query as q } from 'faunadb';
-import { expectTypeOf } from 'expect-type';
+import { query as q } from "faunadb";
+import { expectTypeOf } from "expect-type";
 import { toArray } from "./toArray";
 import { merge } from "./merge";
 import { selectDefault } from "./selectDefault";
 import { select } from "./select";
-import { Arg, Query } from './types';
-import { pipe } from 'fp-ts/lib/function';
+import { Arg, Query } from "./types";
+import { pipe } from "fp-ts/lib/function";
 import { or } from "./or";
 
-describe('object', () => {
-  test('select', () => {
+describe("object", () => {
+  test("select", () => {
     const data = { foo: { bar: { zim: true }, baz: null } };
-    const intermediate = select(data, 'foo', 'bar');
-    const intermediate2 = pipe(data, select('foo', 'bar'));
+    const intermediate = select(data, "foo", "bar");
+    const intermediate2 = pipe(data, select("foo", "bar"));
     expect(intermediate).toEqual(intermediate2);
-    const result = selectDefault(null, 'zim')(intermediate);
+    const result = selectDefault(null, "zim")(intermediate);
     expectTypeOf(result).toEqualTypeOf<Query<boolean | null>>();
-    expect(result).toEqual(
-      q.Select(['zim'], q.Select(['foo', 'bar'], data), null as any)
-    );
+    expect(result).toEqual(q.Select(["zim"], q.Select(["foo", "bar"], data), null as any));
   });
 
-  test('merge', () => {
+  test("merge", () => {
     const one = { foo: true };
     const two = { bar: false };
     type Merged = { foo: boolean; bar: boolean };
@@ -42,11 +40,7 @@ describe('object', () => {
     expectTypeOf(withResolver2).toEqualTypeOf<Query<Merged>>();
     expectTypeOf(withResolver3).toEqualTypeOf<Query<Merged>>();
     expectTypeOf(withResolver4).toEqualTypeOf<Query<Merged>>();
-    const fqlWithResolver = q.Merge(
-      { foo: true },
-      { bar: false },
-      q.Lambda(['key', 'aVal', 'bVal'], q.Var('aVal'))
-    );
+    const fqlWithResolver = q.Merge({ foo: true }, { bar: false }, q.Lambda(["key", "aVal", "bVal"], q.Var("aVal")));
     expect(withResolver2).toEqual(fqlWithResolver);
     expect(withResolver3).toEqual(fqlWithResolver);
     expect(withResolver4).toEqual(fqlWithResolver);
@@ -57,15 +51,13 @@ describe('object', () => {
     mergeOr({ foo: true }, { bar: false });
     mergeOr({ foo: true })({ bar: false });
     //@ts-expect-error
-    mergeOr({ foo: true }, { bar: 'false' });
+    mergeOr({ foo: true }, { bar: "false" });
     //@ts-expect-error
-    mergeOr({ foo: true })({ bar: 'false' });
+    mergeOr({ foo: true })({ bar: "false" });
   });
 
-  test('toArray', () => {
-    const arr = toArray({ foo: true, bar: 'hello' });
-    expectTypeOf(arr).toEqualTypeOf<
-      Query<Array<['foo', boolean] | ['bar', string]>>
-    >();
+  test("toArray", () => {
+    const arr = toArray({ foo: true, bar: "hello" });
+    expectTypeOf(arr).toEqualTypeOf<Query<Array<["foo", boolean] | ["bar", string]>>>();
   });
 });

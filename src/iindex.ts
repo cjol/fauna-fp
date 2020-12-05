@@ -1,5 +1,5 @@
-import { Arg, Ref, Index, Query } from './types';
-import { q } from './types.internal';
+import { Arg, Ref, Index, Query } from "./types";
+import { q } from "./types.internal";
 
 /**
  * The `Index` function returns a valid `Reference` for the specified index name in
@@ -8,5 +8,5 @@ import { q } from './types.internal';
  */
 
 export function index<Terms extends Arg<unknown>[] = [], O = unknown>(name: string): Query<Ref<Index<Terms, O>>> {
-    return q.Index(name);
+  return q.Index(name);
 }
