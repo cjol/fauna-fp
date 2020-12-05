@@ -1,11 +1,7 @@
-import { Arg, Query, QueryResult, Ref } from "./types";
+import { collection } from "./collection";
+import { Arg, Collection, FaunaFunction, Index, Key, Query, QueryResult, Ref, Role, Token, Document } from "./types";
 import { q } from "./types.internal";
 
-export function get<T = unknown>(ref: Arg<Ref<T>>): Query<GetResult<T>> {
+export function get<T = unknown>(ref: Arg<Ref<T>>): Query<T> {
   return q.Get(ref);
-}
-interface GetResult<T> {
-  ref: Ref<QueryResult<T>>;
-  data: QueryResult<T>;
-  ts: number;
 }

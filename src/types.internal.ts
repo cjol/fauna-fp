@@ -1,5 +1,5 @@
 import { query } from "faunadb";
-import { A } from "ts-toolbelt";
+import { A, T } from "ts-toolbelt";
 
 // treat q as untyped because the builtin types aren't very helpful
 export const q = query as Record<keyof typeof query, any>;
@@ -17,3 +17,5 @@ export type Type<Id extends A.Key, A extends any = unknown> = {
   [id]: Id;
   [internal]: A;
 };
+
+export type CleanedType<T> = T extends Type<any> ? Omit<T, typeof id | typeof internal> : T;

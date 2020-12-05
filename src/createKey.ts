@@ -5,21 +5,8 @@ import { q } from "./types.internal";
  * Create a key.
  */
 
-export function createKey<D>(
-  params: Arg<{
-    role: string | Ref<Role> | Array<Ref<Role>>;
-    name?: string;
-    data?: D;
-    database?: Ref<Database>;
-  }>
-) {
-  return q.CreateKey(params) as Query<{
-    ref: Ref<Key<QueryResult<D>>>;
-    database: Ref<Database>;
-    role: string;
-    name?: string;
-    ts: number;
-    secret: string;
-    hashed_secret: string;
-  }>;
+type CreateKeyInput<D, RD> = Arg<Omit<Key<D, RD>, "ref" | "ts" | "hashed_secret">>;
+type CreateKeyResult<D, RD> = Key<D, RD> & { secret: string };
+export function createKey<D, RD>(params: CreateKeyInput<D, RD>) {
+  return q.CreateKey(params) as Query<CreateKeyResult<D, RD>>;
 }

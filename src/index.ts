@@ -88,6 +88,7 @@ export * from "./replace";
 export * from "./replaceStr";
 export * from "./replaceStrRegex";
 export * from "./reverse";
+export * from "./role";
 export * from "./select";
 export * from "./selectDefault";
 export * from "./singleton";

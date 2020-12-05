@@ -1,25 +1,10 @@
-import { Arg, Query, Ref, Timestamp, Collection, FaunaFunction, QueryResult, SourceObject } from "./types";
-import { q } from "./types.internal";
+import { Arg, Query, Index } from "./types";
+import { CleanedType, q } from "./types.internal";
 
 /**  Create an index. */
-
+type CreateIndexParams<I extends any[], O, D> = Omit<CleanedType<Index<I, O, D>>, "ref" | "ts" | "active">;
 export function createIndex<I extends unknown[] = unknown[], O = unknown, D = unknown>(
-  params: Arg<{
-    name: string;
-    source: Arg<Ref<Collection<O>>> | Arg<Array<SourceObject<O>>>;
-    terms?: Array<{ binding: string } | { field: string[] }>;
-    values?: Array<{ reverse?: boolean } & ({ binding: string } | { field: string[] })>;
-    unique?: boolean;
-    serialized?: boolean;
-    data?: D;
-  }>
-): Query<{
-  ref: Ref<FaunaFunction<I, O, QueryResult<D>>>;
-  name: string;
-  source: Ref<Collection<O>> | Array<SourceObject<O>>;
-  active: boolean;
-  partitions: number;
-  ts: Timestamp;
-}> {
+  params: Arg<CreateIndexParams<I, O, D>>
+): Query<Index<I, O, D>> {
   return q.CreateIndex(params);
 }

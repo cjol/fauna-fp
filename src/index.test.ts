@@ -5,7 +5,7 @@ import { map } from "./map";
 import { length } from "./length";
 import { containsStrRegex } from "./containsStrRegex";
 import { expectTypeOf } from "expect-type";
-import { Arg, Page, Query, Ref } from "./types";
+import { Arg, DocRef, Page, Query, Ref } from "./types";
 import { flow, pipe } from "fp-ts/function";
 import { abort } from "./abort";
 import { iff } from "./iff";
@@ -82,7 +82,7 @@ describe("misc", () => {
     }
 
     const usersCollection = collection<User>("users");
-    const commentsByUser = index<[Ref<User>, string], Ref<Comment>>("tagged_comments_by_user");
+    const commentsByUser = index<[DocRef<User>, string], Comment>("tagged_comments_by_user");
     const getUserComments = (id: string, tag: string) => {
       const userRef = ref(usersCollection, id);
       const m = match(commentsByUser, [userRef, tag]);

@@ -1,5 +1,5 @@
 import { A } from "ts-toolbelt";
-import { Type } from "./types.internal";
+import { CleanedType, Type } from "./types.internal";
 
 // the most important datatype is a `Query` type which will represent the result of running an FQL query
 export interface Query<T = unknown> extends Type<"Query", { type: T }> {}
@@ -53,41 +53,88 @@ export interface Collection<T = unknown, D = unknown>
     "Collection",
     {
       type: T;
-      data: D;
     }
-  > {}
+  > {
+  ref: Ref<Collection<T, D>>;
+  ts: number;
+  name: string;
+  data?: D;
+  history_days?: number;
+  ttl_days?: number;
+}
 
-export interface Database<T = unknown> extends Type<"Database", { data: T }> {}
+export interface Database<D = unknown> extends Type<"Database"> {
+  ref: Ref<Database<D>>;
+  global_id: string;
+  ts: number;
+  name: string;
+  data?: D;
+}
 
-export interface Index<O extends Arg[] = [], T = unknown>
+export interface Index<I extends Arg[] = [], O = unknown, D = unknown>
   extends Type<
     "Index",
     {
-      result: T;
-      params: O;
+      result: O;
+      params: I;
     }
-  > {}
+  > {
+  ref: Ref<Index<I, O>>;
+  ts: number;
+  name: string;
+  source: SourceObject<O>;
+  active: boolean;
+  terms?: Array<{ binding: string } | { field: string[] }>;
+  values?: Array<{ reverse?: boolean } & ({ binding: string } | { field: string[] })>;
+  unique?: boolean;
+  serialized?: boolean;
+  data?: D;
+}
 
-export interface Role extends Type<"Role"> {}
+export interface Role<D = unknown> extends Type<"Role"> {
+  ref: Ref<Role<D>>;
+  ts: number;
+  data?: D;
+  name: string;
+  privileges?: Array<Privilege>;
+  membership?: Array<Membership>;
+}
 
-export interface Key<D = unknown>
-  extends Type<
-    "Key",
-    {
-      data: D;
-    }
-  > {}
+export interface Key<D = unknown, RD = unknown> extends Type<"Key"> {
+  ref: Ref<Key<D>>;
+  ts: number;
+  role: string | Ref<Role<RD>>;
+  hashed_secret: string;
+  data?: D;
+  database?: Ref<Database>;
+  name?: string;
+}
 
-export interface Token<D = unknown> extends Type<"Token", { data: D }> {}
+export interface Token<D = unknown> extends Type<"Token"> {
+  ref: Ref<Token<D>>;
+  ts: number;
+  instance: Ref;
+  hashed_secret: string;
+}
 export interface Cursor extends Type<"Cursor"> {}
 export interface Timestamp extends Type<"Timestamp"> {}
 export interface Date extends Type<"Date"> {}
+export type DocRef<T> = Ref<Document<T>>;
 export interface Ref<T = unknown> extends Type<"Ref", { type: T }> {
   id: string;
 }
-export interface FaunaFunction<I extends Arg[], O, D = unknown> extends Type<"Function", { data: D; terms: I; result: O }> {}
+export interface FaunaFunction<I extends Arg[], O, D = unknown> extends Type<"Function", { terms: I; result: O }> {
+  ref: Ref<FaunaFunction<I, O, D>>;
+  ts: number;
+  name: string;
+  role?: string | Role;
+  data?: D;
+  // TODO: I don't yet have a runtime representation of Query objects
+  body: unknown;
+}
 
-export type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<any, T>>;
+// TODO: create a real "schema" type, and set Collection = Schema<Document>
+type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<any, T>>;
 
 // finally, some useful data structures
 
@@ -96,7 +143,7 @@ export type Credentials<I = unknown, D = unknown> = {
   ts: number;
   hashed_password: string;
   instance: Ref<I>;
-  data: D;
+  data?: D;
 };
 
 export interface Page<T> {
@@ -114,6 +161,7 @@ export type Callback<T extends any[], R> = (...x: { [K in keyof T]: Query<T[K]> 
 
 export type Document<T> = {
   ref: Ref<T>;
+  ts: number;
   data: T;
 };
 
@@ -141,4 +189,4 @@ export interface Membership {
   predicate?: (ref: Ref) => boolean;
 }
 
-export type Action = "create" | "delete" | "update";
+export type Action = keyof Privilege["actions"];
