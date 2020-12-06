@@ -83,7 +83,9 @@ describe("misc", () => {
     }
 
     const usersCollection = collection<User>("users");
-    const commentsByUser = index<[DocRef<User>, string], Comment>("tagged_comments_by_user");
+    const commentsByUser = index<[DocRef<User>, string], DocRef<Comment>>(
+      "tagged_comments_by_user"
+    );
     const getUserComments = (id: string, tag: string) => {
       const userRef = ref(usersCollection, id);
       const m = match(commentsByUser, [userRef, tag]);

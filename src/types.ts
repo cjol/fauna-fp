@@ -21,16 +21,19 @@ export type QueryOrLiteral<T = unknown> = Query<T> | T;
 
 export type Arg<T = unknown> = [T] extends [never]
   ? Query<never>
+  : T extends undefined
+  ? undefined
   : T extends Query<infer U> // handle nested queries
-  ? //   TODO: this isn't very elegant, but effectively I'm trying to block descent into our opaque types. Without this I had problem with `Refs` not resolving properly
-    Arg<U>
-  : T extends Ref<unknown> | Function
+  ? Arg<U>
+  : //   TODO: this isn't very elegant, but effectively I'm trying to block descent into our opaque types. Without this I had problem with `Refs` not resolving properly
+  T extends Ref<unknown> | Function
   ? QueryOrLiteral<T>
   : // handle arrays
   T extends Array<infer U>
   ? QueryOrLiteral<Array<Arg<U>>>
   : // handle objects and tuples
-  T extends [...unknown[]] | Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends [...unknown[]] | Record<string, any>
   ? QueryOrLiteral<
       {
         [Index in keyof T]: Arg<T[Index]>;
@@ -97,7 +100,7 @@ export interface Role<D = unknown> extends Type<"Role"> {
   ts: number;
   data?: D;
   name: string;
-  privileges?: Array<Privilege>;
+  privileges: Array<Privilege>;
   membership?: Array<Membership>;
 }
 
@@ -129,11 +132,14 @@ export interface FaunaFunction<I extends Arg[], O, D = unknown>
   ref: Ref<FaunaFunction<I, O, D>>;
   ts: number;
   name: string;
-  role?: string | Role;
+  role?: Ref<Role>;
   data?: D;
   // TODO: I don't yet have a runtime representation of Query objects
-  body: unknown;
+  body: Lambda<I, O>;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface Lambda<I extends Arg[], O> extends Type<"Lambda", { terms: I; result: O }> {}
 
 // TODO: create a real "schema" type, and set Collection = Schema<Document>
 // type Schema<T = unknown> = Ref<Collection<T>> | Ref<Index<unknown[], T>>;
@@ -157,19 +163,22 @@ export interface Page<T> {
 export type Iter<T = unknown> = Page<T> | Array<T>;
 
 export type MapIterable<C extends Iter<unknown>, O> = C extends Page<unknown> ? Page<O> : Array<O>;
-export type IterPayload<C extends Iter> = C extends Iter<infer O> ? O : never;
+export type IterPayload<C extends Iter> = C extends Iter<infer O> ? QueryResult<O> : never;
 
 export type Callback<T extends unknown[], R> = (...x: { [K in keyof T]: Query<T[K]> }) => Arg<R>;
 
 export type Document<T> = {
-  ref: Ref<T>;
+  ref: Ref<Document<T>>;
   ts: number;
   data: T;
+  credentials?: {
+    password: string;
+  };
 };
 
 export interface SourceObject<O> {
   collection: Ref<Collection<O>> | "_";
-  fields: Record<string, (document: Document<O>) => Query<unknown>>;
+  fields: Record<string, Lambda<[Document<O>], unknown>>;
 }
 
 export interface Privilege {

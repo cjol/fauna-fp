@@ -1,4 +1,4 @@
-import { Arg, ArgTuple, Index, Query, Ref, Document } from "./types";
+import { Arg, ArgTuple, Index, Query, Ref } from "./types";
 import { q } from "./types.internal";
 
 /**
@@ -18,11 +18,11 @@ import { q } from "./types.internal";
 
 export function match<I extends unknown[], T>(
   index: Arg<Ref<Index<I, T>>>
-): (...terms: ArgTuple<I>) => Query<Ref<Document<T>>>;
+): (...terms: ArgTuple<I>) => Query<Ref<T>>;
 export function match<I extends unknown[], T>(
   index: Arg<Ref<Index<I, T>>>,
   terms: ArgTuple<I>
-): Query<Ref<Document<T>>>;
+): Query<Ref<T>>;
 export function match<I extends unknown[], T>(index: Arg<Ref<Index<I, T>>>, terms?: ArgTuple<I>) {
   if (terms === undefined) return (terms: ArgTuple<I>) => match(index, terms);
   return q.Match(index, ...terms);

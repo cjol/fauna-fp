@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import { O, A } from "ts-toolbelt";
 import { Arg, Query, QueryResult } from "./types";
 import { q } from "./types.internal";

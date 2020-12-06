@@ -17,4 +17,4 @@ export type Type<Id extends string, A extends unknown = unknown> = {
   [internal]: A;
 };
 
-export type CleanedType<T> = T extends Type<never> ? Omit<T, typeof id | typeof internal> : T;
+export type CleanedType<T> = T extends Type<string> ? Omit<T, typeof id | typeof internal> : T;
