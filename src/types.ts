@@ -26,7 +26,7 @@ export type Arg<T = unknown> = [T] extends [never]
   : T extends Query<infer U> // handle nested queries
   ? Arg<U>
   : //   TODO: this isn't very elegant, but effectively I'm trying to block descent into our opaque types. Without this I had problem with `Refs` not resolving properly
-  T extends Ref<unknown> | Function
+  T extends Ref<unknown> | Function | Match<unknown[], unknown[]>
   ? QueryOrLiteral<T>
   : // handle arrays
   T extends Array<infer U>
@@ -75,18 +75,23 @@ export interface Database<D = unknown> extends Type<"Database"> {
   data?: D;
 }
 
-export interface Index<I extends Arg[] = [], O = unknown, D = unknown>
-  extends Type<
+export interface Index<
+  I extends Arg[],
+  V extends unknown[],
+  O extends unknown = V[0],
+  D = unknown
+> extends Type<
     "Index",
     {
+      values: V;
       result: O;
       params: I;
     }
   > {
-  ref: Ref<Index<I, O>>;
+  ref: Ref<Index<I, V, O, D>>;
   ts: number;
   name: string;
-  source: SourceObject<O>;
+  source: Ref<Collection<O>> | SourceObject<O>;
   active: boolean;
   terms?: Array<{ binding: string } | { field: string[] }>;
   values?: Array<{ reverse?: boolean } & ({ binding: string } | { field: string[] })>;
@@ -94,6 +99,16 @@ export interface Index<I extends Arg[] = [], O = unknown, D = unknown>
   serialized?: boolean;
   data?: D;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface Match<V extends unknown[], O extends unknown = V[0]>
+  extends Type<
+    "Match",
+    {
+      values: V;
+      result: O;
+    }
+  > {}
 
 export interface Role<D = unknown> extends Type<"Role"> {
   ref: Ref<Role<D>>;
@@ -134,7 +149,6 @@ export interface FaunaFunction<I extends Arg[], O, D = unknown>
   name: string;
   role?: Ref<Role>;
   data?: D;
-  // TODO: I don't yet have a runtime representation of Query objects
   body: Lambda<I, O>;
 }
 
