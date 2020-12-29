@@ -75,10 +75,12 @@ export interface Database<D = unknown> extends Type<"Database"> {
   data?: D;
 }
 
+type DefaultIndexType<T> = T extends [DocRef<infer U>] ? Document<U> : unknown;
+
 export interface Index<
   I extends Arg[],
   V extends unknown[],
-  O extends unknown = V[0],
+  O extends unknown = DefaultIndexType<V>,
   D = unknown
 > extends Type<
     "Index",
@@ -101,7 +103,7 @@ export interface Index<
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Match<V extends unknown[], O extends unknown = V[0]>
+export interface Match<V extends unknown[], O extends unknown = DefaultIndexType<V>>
   extends Type<
     "Match",
     {
@@ -136,8 +138,11 @@ export interface Token<D = unknown> extends Type<"Token"> {
   hashed_secret: string;
 }
 export type Cursor = Type<"Cursor">;
-export type Timestamp = Type<"Timestamp">;
-export type Date = Type<"Date">;
+export interface Timestamp extends Type<"Timestamp"> {
+  value: string;
+  date: Date;
+}
+export type FaunaDate = Type<"Date">;
 export type DocRef<T> = Ref<Document<T>>;
 export interface Ref<T = unknown> extends Type<"Ref", { type: T }> {
   id: string;

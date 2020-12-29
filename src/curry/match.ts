@@ -18,5 +18,5 @@ import { Arg, ArgTuple, Index, Ref } from "../types";
 export function match<I extends unknown[], V extends unknown[], T>(
   index: Arg<Ref<Index<I, V, T>>>
 ) {
-  return (terms: ArgTuple<I>) => fns.match(index, terms);
+  return (...terms: ArgTuple<I>) => fns.match(index, terms);
 }

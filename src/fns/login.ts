@@ -1,4 +1,4 @@
-import { Arg, Query, QueryResult, Ref, Timestamp, Token } from "../types";
+import { Arg, Match, Query, QueryResult, Ref, Timestamp, Token } from "../types";
 import { q } from "../types.internal";
 
 interface LoginParams<D> {
@@ -16,7 +16,7 @@ export interface LoginResult<D, T> {
  * Creates an auth token for an identity.
  */
 export function login<D = unknown, T = unknown>(
-  identity: Arg<Ref<QueryResult<T>>>,
+  identity: Arg<Match<unknown[], T> | Ref<T>>,
   params: Arg<LoginParams<D>>
 ): Query<LoginResult<D, T>> {
   return q.Login(identity, params);

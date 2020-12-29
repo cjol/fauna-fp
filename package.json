@@ -3,6 +3,7 @@
   "version": "0.1.14",
   "description": "Functional query builder for fauna db",
   "main": "dist/index.js",
+  "types": "",
   "repository": "git@github.com:cjol/fauna-fp",
   "author": "Christopher Little <christopher@littlehq.uk>",
   "license": "MIT",

@@ -1,6 +1,6 @@
 import { query as q } from "faunadb";
 import { expectTypeOf } from "expect-type";
-import { Arg, Query } from "../types";
+import { Arg, DocRef, Match, Query, Document } from "../types";
 import * as fns from "../fns";
 
 describe("control flow", () => {
@@ -57,6 +57,38 @@ describe("control flow", () => {
         { len: q.Length("hello") },
         q.Let({ constant: 2 }, q.Add(q.Var("constant"), q.Var("len")))
       )
+    );
+  });
+
+  test("join", () => {
+    interface Foo {
+      name: string;
+    }
+    interface Bar {
+      barname: string;
+    }
+    const fooIndex = fns.index<[], [DocRef<Foo>]>("index_one");
+    const barByFooIndex = fns.index<[DocRef<Foo>], [DocRef<Bar>]>("index_two");
+
+    const result = fns.join(fns.match(fooIndex, []), barByFooIndex);
+    expectTypeOf(result).toEqualTypeOf<Query<Match<[DocRef<Bar>, Document<Bar>]>>>();
+    expect(result).toEqual(q.Join(q.Match(q.Index("index_one"), []), q.Index("index_two")));
+  });
+
+  test("join (lambda)", () => {
+    interface Foo {
+      name: string;
+    }
+    interface Bar {
+      barname: string;
+    }
+    const fooIndex = fns.index<[], [DocRef<Foo>]>("index_one");
+    const barByFooIndex = fns.index<[DocRef<Foo>], [DocRef<Bar>]>("index_two");
+
+    const result = fns.join(fns.match(fooIndex, []), (foo) => fns.match(barByFooIndex, [foo]));
+    expectTypeOf(result).toEqualTypeOf<Query<Match<[DocRef<Bar>]>>>();
+    expect(result).toEqual(
+      q.Join(q.Match(q.Index("index_one"), []), (foo) => q.Match(q.Index("index_two"), foo))
     );
   });
 });
