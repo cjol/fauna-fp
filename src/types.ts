@@ -157,6 +157,9 @@ export interface FaunaFunction<I extends Arg[], O, D = unknown>
   body: Lambda<I, O>;
 }
 
+// TODO: look up units for timediff etc
+export type TimeUnit = string;
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Lambda<I extends Arg[], O> extends Type<"Lambda", { terms: I; result: O }> {}
 
